@@ -5,15 +5,30 @@
   "type": "module",
   "description": "API REST del Sistema GIS de Reportes Ciudadanos.",
   "scripts": {
-    "dev": "node -e \"console.log('Backend pendiente de Fase 3')\"",
-    "test": "node -e \"console.log('Tests backend pendientes de Fase 3')\"",
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js --runInBand",
     "db:check": "node scripts/db-check.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed:admin": "node scripts/seed-admin.mjs"
   },
   "dependencies": {
+    "@scalar/express-api-reference": "^0.10.8",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "pg": "^8.22.0"
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "firebase-admin": "^14.1.0",
+    "helmet": "^8.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }

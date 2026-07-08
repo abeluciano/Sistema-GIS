@@ -36,3 +36,13 @@ El usuario administrador de prototipo se siembra por separado:
 ```bash
 npm run db:seed:admin -w backend
 ```
+
+## Fase 3
+
+Pruebas iniciales del backend:
+
+```bash
+npm test -w backend
+```
+
+Cubren health check, OpenAPI, login administrativo, rechazo de credenciales invalidas y middleware Firebase con verificador inyectado.

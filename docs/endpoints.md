@@ -5,6 +5,8 @@ La documentacion formal se expondra con Scalar/OpenAPI en fases posteriores.
 ## Salud
 
 - `GET /health`
+- `GET /openapi.json`
+- `GET /docs`
 
 ## Autenticacion ciudadana y perfil
 
@@ -17,6 +19,10 @@ La documentacion formal se expondra con Scalar/OpenAPI en fases posteriores.
 - `POST /admin/login`
 - `GET /admin/me`
 - `POST /admin/logout`
+
+## Verificacion Firebase base
+
+- `GET /auth/firebase/profile`
 
 ## Gestion
 

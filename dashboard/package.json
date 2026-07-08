@@ -5,8 +5,28 @@
   "type": "module",
   "description": "Dashboard administrativo del Sistema GIS de Reportes Ciudadanos.",
   "scripts": {
-    "dev": "node -e \"console.log('Dashboard pendiente de Fase 6')\"",
-    "test": "node -e \"console.log('Tests dashboard pendientes de Fase 6')\"",
-    "build": "node -e \"console.log('Build dashboard pendiente de Fase 6')\""
+    "dev": "vite --host 0.0.0.0",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "firebase": "^12.15.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.23.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.9.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/leaflet": "^1.9.21",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.10"
   }
 }

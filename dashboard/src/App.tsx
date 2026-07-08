@@ -1,0 +1,212 @@
+import { LogOut, MapPinned } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ChartsPanel } from "./components/ChartsPanel";
+import { FiltersBar } from "./components/FiltersBar";
+import { KpiGrid } from "./components/KpiGrid";
+import { LoginPanel } from "./components/LoginPanel";
+import { MapPanel } from "./components/MapPanel";
+import { ReportsTable } from "./components/ReportsTable";
+import { StatisticalAnalysisPanel } from "./components/StatisticalAnalysisPanel";
+import {
+  buildReportsCsvUrl,
+  changeReportState,
+  getByCategory,
+  getByPeriod,
+  getByZone,
+  getCategories,
+  getHeatmap,
+  getMe,
+  getReportGeoJson,
+  getReports,
+  getSummary,
+  getZones,
+  getZonesGeoJson,
+  loginAdmin,
+  runStatisticalAnalysis,
+  type AdminUser,
+  type Category,
+  type CountPoint,
+  type EstadoReporte,
+  type HeatPoint,
+  type PeriodPoint,
+  type Report,
+  type ReportFilters,
+  type Summary,
+  type Zone
+} from "./services/api";
+
+const TOKEN_KEY = "sistema_gis_admin_token";
+
+export default function App() {
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) ?? "");
+  const [user, setUser] = useState<AdminUser | null>(null);
+  const [filters, setFilters] = useState<ReportFilters>({});
+  const [reports, setReports] = useState<Report[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [summary, setSummary] = useState<Summary>();
+  const [byCategory, setByCategory] = useState<CountPoint[]>([]);
+  const [byZone, setByZone] = useState<CountPoint[]>([]);
+  const [byPeriod, setByPeriod] = useState<PeriodPoint[]>([]);
+  const [reportsGeoJson, setReportsGeoJson] = useState<GeoJSON.FeatureCollection>();
+  const [zonesGeoJson, setZonesGeoJson] = useState<GeoJSON.FeatureCollection>();
+  const [heatmap, setHeatmap] = useState<HeatPoint[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadData = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    setError("");
+    try {
+      const [
+        reportsResponse,
+        categoriesResponse,
+        zonesResponse,
+        summaryResponse,
+        byCategoryResponse,
+        byZoneResponse,
+        byPeriodResponse,
+        reportsGeo,
+        zonesGeo,
+        heatResponse
+      ] = await Promise.all([
+        getReports(token, filters),
+        getCategories(),
+        getZones(),
+        getSummary(token),
+        getByCategory(token),
+        getByZone(token),
+        getByPeriod(token),
+        getReportGeoJson(token, filters),
+        getZonesGeoJson(token),
+        getHeatmap(token)
+      ]);
+
+      setReports(reportsResponse.data);
+      setCategories(categoriesResponse.data);
+      setZones(zonesResponse.data);
+      setSummary(summaryResponse.data);
+      setByCategory(byCategoryResponse.data);
+      setByZone(byZoneResponse.data);
+      setByPeriod(byPeriodResponse.data);
+      setReportsGeoJson(reportsGeo);
+      setZonesGeoJson(zonesGeo);
+      setHeatmap(heatResponse.data);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "No se pudo cargar el dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, token]);
+
+  useEffect(() => {
+    if (!token) return;
+    getMe(token)
+      .then((response) => setUser(response.user))
+      .catch(() => {
+        localStorage.removeItem(TOKEN_KEY);
+        setToken("");
+        setUser(null);
+      });
+  }, [token]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  async function handleLogin(usuario: string, password: string) {
+    const session = await loginAdmin(usuario, password);
+    localStorage.setItem(TOKEN_KEY, session.token);
+    setToken(session.token);
+    setUser(session.user);
+  }
+
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    setToken("");
+    setUser(null);
+  }
+
+  async function handleStateChange(reportId: number, estado: EstadoReporte) {
+    if (!token) return;
+    await changeReportState(token, reportId, estado);
+    await loadData();
+  }
+
+  async function downloadReportsCsv() {
+    if (!token) return;
+    const response = await fetch(buildReportsCsvUrl(filters), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "reportes.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  if (!token) return <LoginPanel onLogin={handleLogin} />;
+
+  return (
+    <main className="dashboard-shell">
+      <aside className="sidebar">
+        <div className="brand-row compact">
+          <span className="brand-mark"><MapPinned size={22} /></span>
+          <div>
+            <p>Sistema GIS</p>
+            <h1>Gestion</h1>
+          </div>
+        </div>
+        <nav aria-label="Modulos">
+          <a href="#operacion">Operacion</a>
+          <a href="#mapa">Mapa</a>
+          <a href="#indicadores">Indicadores</a>
+          <a href="#estadistica">Analisis</a>
+        </nav>
+      </aside>
+
+      <section className="workspace">
+        <header className="topbar">
+          <div>
+            <p>{user?.rol ?? "gestor"}</p>
+            <h2>{user?.nombre ?? "Dashboard administrativo"}</h2>
+          </div>
+          <button type="button" className="secondary-button" onClick={logout}>
+            <LogOut size={17} />
+            <span>Salir</span>
+          </button>
+        </header>
+
+        <section id="operacion" className="workspace-section">
+          <FiltersBar
+            categories={categories}
+            zones={zones}
+            filters={filters}
+            onChange={setFilters}
+            onRefresh={loadData}
+            onExport={downloadReportsCsv}
+          />
+          {error ? <p className="form-error">{error}</p> : null}
+          {loading ? <p className="loading-line">Cargando datos...</p> : null}
+          <KpiGrid summary={summary} />
+        </section>
+
+        <section id="mapa" className="workspace-section two-column">
+          <MapPanel reportsGeoJson={reportsGeoJson} zonesGeoJson={zonesGeoJson} heatmap={heatmap} />
+          <ReportsTable reports={reports} onStateChange={handleStateChange} />
+        </section>
+
+        <section id="indicadores" className="workspace-section">
+          <ChartsPanel byCategory={byCategory} byZone={byZone} byPeriod={byPeriod} />
+        </section>
+
+        <section id="estadistica" className="workspace-section">
+          <StatisticalAnalysisPanel runAnalysis={(request) => runStatisticalAnalysis(token, request)} />
+        </section>
+      </section>
+    </main>
+  );
+}

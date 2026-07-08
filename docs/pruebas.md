@@ -79,3 +79,22 @@ npm run check:structure
 ```
 
 El alcance movil validado cubre autenticacion ciudadana, navegacion protegida, registro de reportes, consulta de reportes propios y acceso a emergencia. No incluye analisis estadistico ni funciones administrativas.
+
+## Fase 6
+
+Validacion del dashboard administrativo:
+
+```bash
+npm run build -w dashboard
+npm test -w dashboard
+```
+
+Validacion cruzada ejecutada en la fase:
+
+```bash
+npm test -w backend
+npm test -w mobile
+npm run check:structure
+```
+
+La prueba del dashboard cubre el panel de analisis estadistico con preguntas de gestion y detalle metodologico separado.

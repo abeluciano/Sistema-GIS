@@ -96,6 +96,8 @@ const requiredPaths = [
   "database/schema.sql",
   "database/check-schema.sql",
   "database/migrations/001_initial_schema.sql",
+  "database/migrations/002_make_legacy_password_nullable.sql",
+  "database/migrations/003_update_usuarios_role_constraint.sql",
   "database/migrations/.gitkeep",
   "database/seeders/.gitkeep",
   "scripts/security-audit.mjs",

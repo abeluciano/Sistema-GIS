@@ -23,6 +23,15 @@ import { indicatorRoutes } from "./routes/indicatorRoutes.js";
 import { statisticsRoutes } from "./routes/statisticsRoutes.js";
 import { userRoutes } from "./routes/userRoutes.js";
 
+function corsOrigin(origin, callback) {
+  const allowedOrigins = env.CORS_ORIGIN.split(",").map((value) => value.trim()).filter(Boolean);
+  if (!origin || allowedOrigins.includes(origin)) {
+    callback(null, true);
+    return;
+  }
+  callback(new Error("Origen CORS no permitido."));
+}
+
 export function createApp(options = {}) {
   const app = express();
 
@@ -33,7 +42,7 @@ export function createApp(options = {}) {
 
   app.use(requestContext);
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+  app.use(cors({ origin: corsOrigin, credentials: true }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser(env.ADMIN_SESSION_SECRET));
   app.use(generalRateLimiter);

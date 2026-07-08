@@ -1,0 +1,73 @@
+PRUEBAS DE CARGA BACKEND - FASE 14
+
+=== GET /health - 20 conexiones ===
+{
+  "targets": [
+    "http://localhost:4000/health"
+  ],
+  "method": "GET",
+  "totalRequests": 100,
+  "concurrency": 20,
+  "completed": 100,
+  "failed": 0,
+  "avgMs": 46.93,
+  "p95Ms": 84.72
+}
+
+=== GET /health - 50 conexiones ===
+{
+  "targets": [
+    "http://localhost:4000/health"
+  ],
+  "method": "GET",
+  "totalRequests": 150,
+  "concurrency": 50,
+  "completed": 150,
+  "failed": 0,
+  "avgMs": 89.22,
+  "p95Ms": 131.58
+}
+
+=== GET /categorias - 50 conexiones ===
+{
+  "targets": [
+    "http://localhost:4000/categorias"
+  ],
+  "method": "GET",
+  "totalRequests": 150,
+  "concurrency": 50,
+  "completed": 150,
+  "failed": 0,
+  "avgMs": 740.01,
+  "p95Ms": 1268.06
+}
+
+=== GET /reportes - 50 conexiones ===
+{
+  "targets": [
+    "http://localhost:4000/reportes?page=1&page_size=5"
+  ],
+  "method": "GET",
+  "totalRequests": 100,
+  "concurrency": 50,
+  "completed": 100,
+  "failed": 0,
+  "avgMs": 1308.22,
+  "p95Ms": 1730.47
+}
+
+=== Flujo mixto - 50 conexiones ===
+{
+  "targets": [
+    "http://localhost:4000/health",
+    "http://localhost:4000/categorias",
+    "http://localhost:4000/reportes?page=1&page_size=5"
+  ],
+  "method": "GET",
+  "totalRequests": 150,
+  "concurrency": 50,
+  "completed": 150,
+  "failed": 0,
+  "avgMs": 846.87,
+  "p95Ms": 2820.59
+}

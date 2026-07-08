@@ -1,0 +1,100 @@
+┌─────────┬────┬─────────────────────────────────────┬────────────────┬──────────────┬───────────┬────────┐
+│ (index) │ id │ name                                │ expectedStatus │ actualStatus │ elapsedMs │ result │
+├─────────┼────┼─────────────────────────────────────┼────────────────┼──────────────┼───────────┼────────┤
+│ 0       │ 1  │ 'GET /health'                       │ 200            │ 200          │ 62.87     │ 'OK'   │
+│ 1       │ 2  │ 'POST /admin/login incompleto'      │ 400            │ 400          │ 14.16     │ 'OK'   │
+│ 2       │ 3  │ 'POST /admin/login invalido'        │ 401            │ 401          │ 1258.71   │ 'OK'   │
+│ 3       │ 4  │ 'POST /admin/login valido'          │ 200            │ 200          │ 550.69    │ 'OK'   │
+│ 4       │ 5  │ 'GET /admin/me sin token'           │ 401            │ 401          │ 2.48      │ 'OK'   │
+│ 5       │ 6  │ 'GET /admin/me autenticado'         │ 200            │ 200          │ 3.52      │ 'OK'   │
+│ 6       │ 7  │ 'GET /reportes paginado'            │ 200            │ 200          │ 232.35    │ 'OK'   │
+│ 7       │ 8  │ 'POST /reportes sin Firebase token' │ 401            │ 401          │ 2.98      │ 'OK'   │
+│ 8       │ 9  │ 'PATCH /reportes sin estado'        │ 400            │ 400          │ 6.14      │ 'OK'   │
+│ 9       │ 10 │ 'GET /reportes ajusta pagina'       │ 200            │ 200          │ 228.85    │ 'OK'   │
+└─────────┴────┴─────────────────────────────────────┴────────────────┴──────────────┴───────────┴────────┘
+{
+  "total": 10,
+  "passed": 10,
+  "results": [
+    {
+      "id": 1,
+      "name": "GET /health",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "elapsedMs": 62.87,
+      "result": "OK"
+    },
+    {
+      "id": 2,
+      "name": "POST /admin/login incompleto",
+      "expectedStatus": 400,
+      "actualStatus": 400,
+      "elapsedMs": 14.16,
+      "result": "OK"
+    },
+    {
+      "id": 3,
+      "name": "POST /admin/login invalido",
+      "expectedStatus": 401,
+      "actualStatus": 401,
+      "elapsedMs": 1258.71,
+      "result": "OK"
+    },
+    {
+      "id": 4,
+      "name": "POST /admin/login valido",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "elapsedMs": 550.69,
+      "result": "OK"
+    },
+    {
+      "id": 5,
+      "name": "GET /admin/me sin token",
+      "expectedStatus": 401,
+      "actualStatus": 401,
+      "elapsedMs": 2.48,
+      "result": "OK"
+    },
+    {
+      "id": 6,
+      "name": "GET /admin/me autenticado",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "elapsedMs": 3.52,
+      "result": "OK"
+    },
+    {
+      "id": 7,
+      "name": "GET /reportes paginado",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "elapsedMs": 232.35,
+      "result": "OK"
+    },
+    {
+      "id": 8,
+      "name": "POST /reportes sin Firebase token",
+      "expectedStatus": 401,
+      "actualStatus": 401,
+      "elapsedMs": 2.98,
+      "result": "OK"
+    },
+    {
+      "id": 9,
+      "name": "PATCH /reportes sin estado",
+      "expectedStatus": 400,
+      "actualStatus": 400,
+      "elapsedMs": 6.14,
+      "result": "OK"
+    },
+    {
+      "id": 10,
+      "name": "GET /reportes ajusta pagina",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "elapsedMs": 228.85,
+      "result": "OK"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { requireRole } from "../middlewares/requireRole.js";
 import { validate } from "../middlewares/validate.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { HttpError } from "../utils/httpError.js";
+import { buildPagination, normalizePaginationQuery } from "../utils/pagination.js";
 
 export const reportRoutes = Router();
 
@@ -106,10 +107,10 @@ async function transitionReport(req, res, targetState, action) {
   const result = await query(
     `
       update reportes
-      set estado = $2,
-          zona_id = coalesce($3, zona_id),
-          validado_por = case when $2 = 'validado' then $4 else validado_por end,
-          validado_at = case when $2 = 'validado' then now() else validado_at end,
+      set estado = $2::varchar,
+          zona_id = coalesce($3::integer, zona_id),
+          validado_por = case when $2::varchar = 'validado' then $4::integer else validado_por end,
+          validado_at = case when $2::varchar = 'validado' then now() else validado_at end,
           updated_at = now()
       where id = $1
       returning *
@@ -131,16 +132,13 @@ async function transitionReport(req, res, targetState, action) {
 
 reportRoutes.get("/reportes", authenticateAdmin, requireRole("gestor", "administrador"), asyncHandler(async (req, res) => {
   const { where, values } = buildReportFilters(req.query);
-  const requestedPage = Math.max(1, Number.parseInt(String(req.query.page ?? "1"), 10) || 1);
-  const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(req.query.page_size ?? "10"), 10) || 10));
+  const { requestedPage, pageSize } = normalizePaginationQuery(req.query);
   const countResult = await query(
     `select count(*)::int as total from reportes r ${where}`,
     values
   );
-  const total = Number(countResult.rows[0]?.total ?? 0);
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const page = Math.min(requestedPage, totalPages);
-  const paginatedValues = [...values, pageSize, (page - 1) * pageSize];
+  const pagination = buildPagination(countResult.rows[0]?.total, requestedPage, pageSize);
+  const paginatedValues = [...values, pagination.page_size, pagination.offset];
   const result = await query(
     `
       select
@@ -159,10 +157,10 @@ reportRoutes.get("/reportes", authenticateAdmin, requireRole("gestor", "administ
   res.json({
     data: result.rows,
     pagination: {
-      page,
-      page_size: pageSize,
-      total,
-      total_pages: totalPages
+      page: pagination.page,
+      page_size: pagination.page_size,
+      total: pagination.total,
+      total_pages: pagination.total_pages
     }
   });
 }));

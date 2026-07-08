@@ -1,0 +1,80 @@
+┌─────────┬───────────────────────────────────┬────────┬───────────┬───────┐
+│ (index) │ scenario                          │ volume │ elapsedMs │ valid │
+├─────────┼───────────────────────────────────┼────────┼───────────┼───────┤
+│ 0       │ 'Deserializacion JSON 1000'       │ 1000   │ 0.68      │ true  │
+│ 1       │ 'Deserializacion JSON 2500'       │ 2500   │ 1.54      │ true  │
+│ 2       │ 'Deserializacion JSON 5000'       │ 5000   │ 3.09      │ true  │
+│ 3       │ 'Filtrado y ordenamiento 100'     │ 100    │ 0.19      │ true  │
+│ 4       │ 'Filtrado y ordenamiento 500'     │ 500    │ 1.01      │ true  │
+│ 5       │ 'Filtrado y ordenamiento 1000'    │ 1000   │ 1.95      │ true  │
+│ 6       │ 'Computacion estadistica 1000'    │ 1000   │ 0.03      │ true  │
+│ 7       │ 'Computacion estadistica 10000'   │ 10000  │ 0.08      │ true  │
+│ 8       │ 'Serializacion GeoJSON puntos'    │ 1000   │ 1.68      │ true  │
+│ 9       │ 'Serializacion GeoJSON poligonos' │ 250    │ 0.15      │ true  │
+└─────────┴───────────────────────────────────┴────────┴───────────┴───────┘
+{
+  "total": 10,
+  "passed": 10,
+  "results": [
+    {
+      "scenario": "Deserializacion JSON 1000",
+      "volume": 1000,
+      "elapsedMs": 0.68,
+      "valid": true
+    },
+    {
+      "scenario": "Deserializacion JSON 2500",
+      "volume": 2500,
+      "elapsedMs": 1.54,
+      "valid": true
+    },
+    {
+      "scenario": "Deserializacion JSON 5000",
+      "volume": 5000,
+      "elapsedMs": 3.09,
+      "valid": true
+    },
+    {
+      "scenario": "Filtrado y ordenamiento 100",
+      "volume": 100,
+      "elapsedMs": 0.19,
+      "valid": true
+    },
+    {
+      "scenario": "Filtrado y ordenamiento 500",
+      "volume": 500,
+      "elapsedMs": 1.01,
+      "valid": true
+    },
+    {
+      "scenario": "Filtrado y ordenamiento 1000",
+      "volume": 1000,
+      "elapsedMs": 1.95,
+      "valid": true
+    },
+    {
+      "scenario": "Computacion estadistica 1000",
+      "volume": 1000,
+      "elapsedMs": 0.03,
+      "valid": true
+    },
+    {
+      "scenario": "Computacion estadistica 10000",
+      "volume": 10000,
+      "elapsedMs": 0.08,
+      "valid": true
+    },
+    {
+      "scenario": "Serializacion GeoJSON puntos",
+      "volume": 1000,
+      "elapsedMs": 1.68,
+      "valid": true
+    },
+    {
+      "scenario": "Serializacion GeoJSON poligonos",
+      "volume": 250,
+      "elapsedMs": 0.15,
+      "valid": true
+    }
+  ]
+}

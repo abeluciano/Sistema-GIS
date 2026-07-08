@@ -1,0 +1,10 @@
+﻿
+> @sistema-gis/backend@0.1.0 test
+> node --experimental-vm-modules ../node_modules/jest/bin/jest.js --runInBand
+
+ 
+Test Suites: 6 passed, 6 total
+Tests:       15 passed, 15 total
+Snapshots:   0 total
+Time:        5.586 s, estimated 6 s
+Ran all test suites.

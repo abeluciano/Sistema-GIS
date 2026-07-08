@@ -13,10 +13,15 @@ node_modules/
 firebase-adminsdk*.json
 google-services.json
 GoogleService-Info.plist
+local.properties
+*.jks
+*.keystore
 
 # Build outputs
 dist/
 build/
+.gradle/
+.kotlin/
 coverage/
 .nyc_output/
 

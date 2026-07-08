@@ -9,7 +9,7 @@ function normalizePrivateKey(value) {
 export async function resolveFirebaseAuth() {
   if (cachedAuth) return cachedAuth;
 
-  if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_CLIENT_EMAIL || !env.FIREBASE_PRIVATE_KEY) {
+  if (!env.FIREBASE_PROJECT_ID) {
     return null;
   }
 
@@ -19,12 +19,15 @@ export async function resolveFirebaseAuth() {
   ]);
 
   if (getApps().length === 0) {
-    initializeApp({
+    const hasServiceAccount = env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY;
+    initializeApp(hasServiceAccount ? {
       credential: cert({
         projectId: env.FIREBASE_PROJECT_ID,
         clientEmail: env.FIREBASE_CLIENT_EMAIL,
         privateKey: normalizePrivateKey(env.FIREBASE_PRIVATE_KEY)
       })
+    } : {
+      projectId: env.FIREBASE_PROJECT_ID
     });
   }
 

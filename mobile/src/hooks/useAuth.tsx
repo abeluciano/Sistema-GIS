@@ -1,4 +1,5 @@
-import { onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
+import { Capacitor } from "@capacitor/core";
+import { getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from "firebase/auth";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { firebaseAuth, googleProvider } from "../firebase/config";
 import { syncProfile } from "../services/api";
@@ -17,6 +18,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    getRedirectResult(firebaseAuth)
+      .then((credential) => {
+        if (credential?.user) return syncProfile(credential.user);
+        return undefined;
+      })
+      .catch(() => undefined);
+
     return onAuthStateChanged(firebaseAuth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -28,6 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     loading,
     async loginWithGoogle() {
+      if (Capacitor.isNativePlatform()) {
+        await signInWithRedirect(firebaseAuth, googleProvider);
+        return;
+      }
+
       const credential = await signInWithPopup(firebaseAuth, googleProvider);
       await syncProfile(credential.user);
     },

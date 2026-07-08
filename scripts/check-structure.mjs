@@ -76,6 +76,11 @@ const requiredPaths = [
   "mobile/package.json",
   "mobile/.env.example",
   "mobile/capacitor.config.ts",
+  "mobile/android/build.gradle",
+  "mobile/android/gradlew.bat",
+  "mobile/android/settings.gradle",
+  "mobile/android/app/build.gradle",
+  "mobile/android/app/src/main/AndroidManifest.xml",
   "mobile/index.html",
   "mobile/tsconfig.json",
   "mobile/vite.config.ts",
@@ -120,6 +125,9 @@ const forbiddenPaths = [
   "dashboard/.env",
   "dashboard/.env.local",
   "mobile/.env",
+  "mobile/.env.local",
+  "mobile/android/local.properties",
+  "mobile/android/app/google-services.json",
   "mobile/google-services.json",
   "google-services.json"
 ];
@@ -132,6 +140,7 @@ const requiredIgnorePatterns = [
   ".env",
   "google-services.json",
   "firebase-adminsdk*.json",
+  "local.properties",
   "backend/uploads/**",
   "tmp/"
 ];

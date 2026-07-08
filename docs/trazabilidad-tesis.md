@@ -21,3 +21,13 @@ Limite de lectura usado para desarrollo inicial: hasta antes de la seccion `3.4.
 - Dashboard: autenticacion administrativa interna con password hasheado.
 - Fotos: storage local controlado, sin guardar binarios en PostgreSQL.
 - Analisis estadistico exploratorio: solo en dashboard para gestores y administradores, con interpretaciones en lenguaje simple y sin conclusiones causales.
+
+## Fase 2 - Base de datos
+
+La validacion del esquema toma como referencia el modelo de datos de la tesis y los ajustes de seguridad confirmados:
+
+- `usuarios.password_hash` reemplaza cualquier password en texto plano.
+- `usuarios.firebase_uid` permite sincronizar ciudadanos autenticados con Firebase.
+- `reporte_fotos.ruta_relativa` almacena referencias al storage local controlado.
+- Las geometrias usan SRID 4326.
+- El usuario `admin/admin` se considera credencial academica de prototipo, se siembra de forma explicita y se guarda con hash bcrypt.

@@ -14,3 +14,8 @@ select table_name
 from information_schema.views
 where table_schema = 'public'
 order by table_name;
+
+select f_table_name, f_geometry_column, type, srid
+from public.geometry_columns
+where f_table_schema = 'public'
+order by f_table_name, f_geometry_column;

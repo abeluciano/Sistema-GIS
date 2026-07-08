@@ -16,3 +16,23 @@ La validacion disponible en esta fase es estructural:
 ```bash
 npm run check:structure
 ```
+
+## Fase 2
+
+La validacion de esquema se ejecuta contra PostgreSQL/PostGIS con:
+
+```bash
+npm run db:check -w backend
+```
+
+Si faltan objetos, las migraciones incrementales se aplican con:
+
+```bash
+npm run db:migrate -w backend
+```
+
+El usuario administrador de prototipo se siembra por separado:
+
+```bash
+npm run db:seed:admin -w backend
+```

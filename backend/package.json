@@ -7,6 +7,13 @@
   "scripts": {
     "dev": "node -e \"console.log('Backend pendiente de Fase 3')\"",
     "test": "node -e \"console.log('Tests backend pendientes de Fase 3')\"",
-    "db:check": "node -e \"console.log('Validacion de esquema pendiente de Fase 2')\""
+    "db:check": "node scripts/db-check.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:seed:admin": "node scripts/seed-admin.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
   }
 }

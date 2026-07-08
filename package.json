@@ -10,6 +10,8 @@
   ],
   "scripts": {
     "check:structure": "node scripts/check-structure.mjs",
+    "db:check": "npm run db:check -w backend",
+    "db:migrate": "npm run db:migrate -w backend",
     "test": "npm run check:structure"
   },
   "engines": {

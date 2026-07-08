@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Sistema GIS Ciudadano</string>
     <string name="title_activity_main">Sistema GIS Ciudadano</string>
-    <string name="package_name">com.sistemagis.ciudadano</string>
-    <string name="custom_url_scheme">com.sistemagis.ciudadano</string>
+    <string name="package_name">com.jlbr.reportes</string>
+    <string name="custom_url_scheme">com.jlbr.reportes</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.sistemagis.ciudadano;
+package com.jlbr.reportes;
 
 import com.getcapacitor.BridgeActivity;
 

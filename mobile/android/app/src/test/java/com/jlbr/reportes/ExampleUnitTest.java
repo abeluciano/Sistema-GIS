@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.jlbr.reportes;
 
 import static org.junit.Assert.*;
 

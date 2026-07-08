@@ -53,6 +53,7 @@ const requiredPaths = [
   "backend/tests/adminAuth.test.js",
   "backend/tests/firebaseAuth.test.js",
   "backend/tests/statisticsService.test.js",
+  "backend/tests/userRoutes.test.js",
   "dashboard/package.json",
   "dashboard/.env.example",
   "dashboard/index.html",

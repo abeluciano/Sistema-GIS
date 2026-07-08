@@ -18,26 +18,24 @@ const activeBody = z.object({
   body: z.object({ activo: z.boolean() })
 });
 
-userRoutes.use(authenticateAdmin);
-
-userRoutes.get("/usuarios", requireRole("gestor", "administrador"), asyncHandler(async (req, res) => {
+userRoutes.get("/usuarios", authenticateAdmin, requireRole("gestor", "administrador"), asyncHandler(async (req, res) => {
   const users = await req.app.locals.repositories.user.list(req.query);
   res.json({ data: users });
 }));
 
-userRoutes.get("/usuarios/:id", requireRole("gestor", "administrador"), validate(idParams), asyncHandler(async (req, res) => {
+userRoutes.get("/usuarios/:id", authenticateAdmin, requireRole("gestor", "administrador"), validate(idParams), asyncHandler(async (req, res) => {
   const user = await req.app.locals.repositories.user.findById(req.params.id);
   if (!user) throw new HttpError(404, "Usuario no encontrado.");
   res.json({ data: user });
 }));
 
-userRoutes.patch("/usuarios/:id/rol", requireRole("administrador"), validate(roleBody), asyncHandler(async (req, res) => {
+userRoutes.patch("/usuarios/:id/rol", authenticateAdmin, requireRole("administrador"), validate(roleBody), asyncHandler(async (req, res) => {
   const user = await req.app.locals.repositories.user.updateRole(req.params.id, req.body.rol);
   if (!user) throw new HttpError(404, "Usuario no encontrado.");
   res.json({ data: user });
 }));
 
-userRoutes.patch("/usuarios/:id/estado", requireRole("administrador"), validate(activeBody), asyncHandler(async (req, res) => {
+userRoutes.patch("/usuarios/:id/estado", authenticateAdmin, requireRole("administrador"), validate(activeBody), asyncHandler(async (req, res) => {
   const user = await req.app.locals.repositories.user.updateActive(req.params.id, req.body.activo);
   if (!user) throw new HttpError(404, "Usuario no encontrado.");
   res.json({ data: user });

@@ -61,3 +61,21 @@ Casos cubiertos:
 - Mann-Whitney U.
 - Kruskal-Wallis.
 - Spearman.
+
+## Fase 5
+
+Validacion de la app movil ciudadana:
+
+```bash
+npm run build -w mobile
+npm test -w mobile
+```
+
+Validacion cruzada ejecutada en la fase:
+
+```bash
+npm test -w backend
+npm run check:structure
+```
+
+El alcance movil validado cubre autenticacion ciudadana, navegacion protegida, registro de reportes, consulta de reportes propios y acceso a emergencia. No incluye analisis estadistico ni funciones administrativas.

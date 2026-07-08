@@ -6,11 +6,13 @@ type FiltersBarProps = {
   zones: Zone[];
   filters: ReportFilters;
   onChange: (filters: ReportFilters) => void;
+  onSearch: () => void;
   onRefresh: () => void;
   onExport: () => void;
+  loading?: boolean;
 };
 
-export function FiltersBar({ categories, zones, filters, onChange, onRefresh, onExport }: FiltersBarProps) {
+export function FiltersBar({ categories, zones, filters, onChange, onSearch, onRefresh, onExport, loading }: FiltersBarProps) {
   function update(key: keyof ReportFilters, value: string) {
     onChange({ ...filters, [key]: value || undefined });
   }
@@ -65,13 +67,15 @@ export function FiltersBar({ categories, zones, filters, onChange, onRefresh, on
         <input type="date" value={filters.fecha_fin ?? ""} onChange={(event) => update("fecha_fin", event.target.value)} />
       </label>
       <div className="filter-actions">
-        <button type="button" className="icon-button" onClick={onRefresh} aria-label="Actualizar">
+        <button type="button" className="icon-button" onClick={onRefresh} aria-label="Actualizar" title="Actualizar datos" disabled={loading}>
           <RefreshCw size={17} />
         </button>
-        <button type="button" className="icon-button" onClick={onExport} aria-label="Exportar CSV">
+        <button type="button" className="icon-button" onClick={onExport} aria-label="Exportar CSV" title="Exportar CSV" disabled={loading}>
           <Download size={17} />
         </button>
-        <Search size={18} aria-hidden="true" className="filter-status" />
+        <button type="button" className="icon-button search-button" onClick={onSearch} aria-label="Aplicar filtros" title="Aplicar filtros" disabled={loading}>
+          <Search size={18} />
+        </button>
       </div>
     </section>
   );

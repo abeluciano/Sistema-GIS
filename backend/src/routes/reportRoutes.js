@@ -131,6 +131,16 @@ async function transitionReport(req, res, targetState, action) {
 
 reportRoutes.get("/reportes", authenticateAdmin, requireRole("gestor", "administrador"), asyncHandler(async (req, res) => {
   const { where, values } = buildReportFilters(req.query);
+  const requestedPage = Math.max(1, Number.parseInt(String(req.query.page ?? "1"), 10) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(req.query.page_size ?? "10"), 10) || 10));
+  const countResult = await query(
+    `select count(*)::int as total from reportes r ${where}`,
+    values
+  );
+  const total = Number(countResult.rows[0]?.total ?? 0);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const paginatedValues = [...values, pageSize, (page - 1) * pageSize];
   const result = await query(
     `
       select
@@ -140,12 +150,21 @@ reportRoutes.get("/reportes", authenticateAdmin, requireRole("gestor", "administ
       join reportes r on r.id = v.id
       ${where}
       order by v.created_at desc
-      limit 500
+      limit $${paginatedValues.length - 1}
+      offset $${paginatedValues.length}
     `,
-    values
+    paginatedValues
   );
 
-  res.json({ data: result.rows });
+  res.json({
+    data: result.rows,
+    pagination: {
+      page,
+      page_size: pageSize,
+      total,
+      total_pages: totalPages
+    }
+  });
 }));
 
 reportRoutes.get("/reportes/:id", authenticateAdmin, requireRole("gestor", "administrador"), validate(idParams), asyncHandler(async (req, res) => {

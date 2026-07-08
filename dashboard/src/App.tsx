@@ -31,6 +31,7 @@ import {
   type PeriodPoint,
   type Report,
   type ReportFilters,
+  type ReportPagination,
   type Summary,
   type Zone
 } from "./services/api";
@@ -41,7 +42,16 @@ export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) ?? "");
   const [user, setUser] = useState<AdminUser | null>(null);
   const [filters, setFilters] = useState<ReportFilters>({});
+  const [draftFilters, setDraftFilters] = useState<ReportFilters>({});
   const [reports, setReports] = useState<Report[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [reportPagination, setReportPagination] = useState<ReportPagination>({
+    page: 1,
+    page_size: 5,
+    total: 0,
+    total_pages: 1
+  });
   const [categories, setCategories] = useState<Category[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [summary, setSummary] = useState<Summary>();
@@ -53,6 +63,8 @@ export default function App() {
   const [heatmap, setHeatmap] = useState<HeatPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [actionError, setActionError] = useState("");
 
   const loadData = useCallback(async () => {
     if (!token) return;
@@ -71,7 +83,7 @@ export default function App() {
         zonesGeo,
         heatResponse
       ] = await Promise.all([
-        getReports(token, filters),
+        getReports(token, filters, page, pageSize),
         getCategories(),
         getZones(),
         getSummary(token),
@@ -84,6 +96,8 @@ export default function App() {
       ]);
 
       setReports(reportsResponse.data);
+      setReportPagination(reportsResponse.pagination);
+      if (reportsResponse.pagination.page !== page) setPage(reportsResponse.pagination.page);
       setCategories(categoriesResponse.data);
       setZones(zonesResponse.data);
       setSummary(summaryResponse.data);
@@ -98,7 +112,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [filters, token]);
+  }, [filters, page, pageSize, token]);
 
   useEffect(() => {
     if (!token) return;
@@ -130,8 +144,27 @@ export default function App() {
 
   async function handleStateChange(reportId: number, estado: EstadoReporte) {
     if (!token) return;
-    await changeReportState(token, reportId, estado);
-    await loadData();
+    setActionError("");
+    setActionMessage("");
+    try {
+      await changeReportState(token, reportId, estado);
+      setActionMessage(estado === "validado" ? "Reporte validado correctamente." : "Reporte marcado como atendido.");
+      await loadData();
+    } catch (stateError) {
+      setActionError(stateError instanceof Error ? stateError.message : "No se pudo actualizar el reporte.");
+    }
+  }
+
+  function applyFilters() {
+    setActionError("");
+    setActionMessage("");
+    setPage(1);
+    setFilters({ ...draftFilters });
+  }
+
+  function changePageSize(nextPageSize: number) {
+    setPage(1);
+    setPageSize(nextPageSize);
   }
 
   async function downloadReportsCsv() {
@@ -184,10 +217,12 @@ export default function App() {
           <FiltersBar
             categories={categories}
             zones={zones}
-            filters={filters}
-            onChange={setFilters}
+            filters={draftFilters}
+            onChange={setDraftFilters}
+            onSearch={applyFilters}
             onRefresh={loadData}
             onExport={downloadReportsCsv}
+            loading={loading}
           />
           {error ? <p className="form-error">{error}</p> : null}
           {loading ? <p className="loading-line">Cargando datos...</p> : null}
@@ -196,7 +231,15 @@ export default function App() {
 
         <section id="mapa" className="workspace-section two-column">
           <MapPanel reportsGeoJson={reportsGeoJson} zonesGeoJson={zonesGeoJson} heatmap={heatmap} />
-          <ReportsTable reports={reports} onStateChange={handleStateChange} />
+          <ReportsTable
+            reports={reports}
+            pagination={reportPagination}
+            onPageChange={setPage}
+            onPageSizeChange={changePageSize}
+            onStateChange={handleStateChange}
+            actionMessage={actionMessage}
+            actionError={actionError}
+          />
         </section>
 
         <section id="indicadores" className="workspace-section">

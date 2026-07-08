@@ -87,6 +87,13 @@ export type ReportFilters = {
   fecha_fin?: string;
 };
 
+export type ReportPagination = {
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+};
+
 export type StatisticalResult = {
   canRun: boolean;
   test?: string;
@@ -171,8 +178,11 @@ export async function getMe(token: string) {
   return request<{ user: AdminUser }>("/admin/me", { headers: authHeaders(token) });
 }
 
-export async function getReports(token: string, filters: ReportFilters) {
-  return request<{ data: Report[] }>(`/reportes${buildQuery(filters)}`, { headers: authHeaders(token) });
+export async function getReports(token: string, filters: ReportFilters, page: number, pageSize: number) {
+  return request<{ data: Report[]; pagination: ReportPagination }>(
+    `/reportes${buildQuery({ ...filters, page: String(page), page_size: String(pageSize) })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
 export async function getCategories() {

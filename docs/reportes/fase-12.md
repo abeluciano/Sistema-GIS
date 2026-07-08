@@ -19,6 +19,10 @@ navegacion Android y sincronizacion del perfil ciudadano.
 - El boton Atrás fisico usa un unico listener y rutas de retorno deterministas.
 - La sincronizacion Firebase enlaza perfiles ciudadanos existentes por correo y
   crea perfiles nuevos mediante un upsert compatible con el indice parcial.
+- Una migracion de compatibilidad permite crear reportes en bases que aun conservan
+  la columna textual antigua `reportes.categoria`.
+- Se normalizaron las restricciones heredadas de urgencia y estado para que coincidan
+  con el contrato vigente de la API.
 - El backend cierra ordenadamente ante `SIGINT` y `SIGTERM`.
 
 ## Verificacion

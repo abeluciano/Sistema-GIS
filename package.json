@@ -1,0 +1,18 @@
+{
+  "name": "sistema-gis-reportes-ciudadanos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo para el Sistema GIS de Reportes Ciudadanos.",
+  "workspaces": [
+    "backend",
+    "dashboard",
+    "mobile"
+  ],
+  "scripts": {
+    "check:structure": "node scripts/check-structure.mjs",
+    "test": "npm run check:structure"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

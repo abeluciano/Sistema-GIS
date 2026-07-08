@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*service-account*.json
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+
+# Build outputs
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime uploads and generated data
+backend/uploads/**
+!backend/uploads/.gitkeep
+tmp/
+
+# Local editor and Codex metadata
+.vscode/
+.idea/
+.agents/
+.codex/
+
+# OS files
+.DS_Store
+Thumbs.db

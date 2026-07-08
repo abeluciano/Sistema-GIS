@@ -1,0 +1,12 @@
+{
+  "name": "@sistema-gis/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dashboard administrativo del Sistema GIS de Reportes Ciudadanos.",
+  "scripts": {
+    "dev": "node -e \"console.log('Dashboard pendiente de Fase 6')\"",
+    "test": "node -e \"console.log('Tests dashboard pendientes de Fase 6')\"",
+    "build": "node -e \"console.log('Build dashboard pendiente de Fase 6')\""
+  }
+}

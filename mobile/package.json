@@ -1,0 +1,12 @@
+{
+  "name": "@sistema-gis/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aplicacion movil ciudadana del Sistema GIS de Reportes Ciudadanos.",
+  "scripts": {
+    "dev": "node -e \"console.log('Mobile pendiente de Fase 5')\"",
+    "test": "node -e \"console.log('Tests mobile pendientes de Fase 5')\"",
+    "build": "node -e \"console.log('Build mobile pendiente de Fase 5')\""
+  }
+}

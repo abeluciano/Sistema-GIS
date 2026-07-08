@@ -1,0 +1,12 @@
+{
+  "name": "@sistema-gis/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API REST del Sistema GIS de Reportes Ciudadanos.",
+  "scripts": {
+    "dev": "node -e \"console.log('Backend pendiente de Fase 3')\"",
+    "test": "node -e \"console.log('Tests backend pendientes de Fase 3')\"",
+    "db:check": "node -e \"console.log('Validacion de esquema pendiente de Fase 2')\""
+  }
+}

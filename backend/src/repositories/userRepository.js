@@ -37,14 +37,31 @@ export const userRepository = {
   async syncFirebaseUser({ firebaseUid, email, nombre }) {
     const result = await query(
       `
-        insert into usuarios (firebase_uid, email, nombre, rol, activo)
-        values ($1, $2, $3, 'ciudadano', true)
-        on conflict (firebase_uid) do update
-        set
-          email = excluded.email,
-          nombre = excluded.nombre,
-          updated_at = now()
-        returning id, firebase_uid, email, nombre, rol, activo, created_at, updated_at
+        with updated_by_email as (
+          update usuarios
+          set
+            firebase_uid = $1,
+            nombre = $3,
+            updated_at = now()
+          where email = $2
+            and rol = 'ciudadano'
+          returning id, firebase_uid, email, nombre, rol, activo, created_at, updated_at
+        ),
+        upserted_by_uid as (
+          insert into usuarios (firebase_uid, email, nombre, rol, activo)
+          select $1, $2, $3, 'ciudadano', true
+          where not exists (select 1 from updated_by_email)
+          on conflict (firebase_uid) where firebase_uid is not null do update
+          set
+            email = excluded.email,
+            nombre = excluded.nombre,
+            updated_at = now()
+          returning id, firebase_uid, email, nombre, rol, activo, created_at, updated_at
+        )
+        select * from updated_by_email
+        union all
+        select * from upserted_by_uid
+        limit 1
       `,
       [firebaseUid, email, nombre]
     );

@@ -1,6 +1,8 @@
+import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { IonApp, IonSpinner } from "@ionic/react";
-import type { ReactNode } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useRef, type ReactNode } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { DetailReportPage } from "./pages/DetailReportPage";
 import { EmergencyPage } from "./pages/EmergencyPage";
@@ -14,6 +16,48 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return user ? <>{children}</> : <Navigate replace to="/welcome" />;
 }
 
+function AndroidBackButtonHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathnameRef = useRef(location.pathname);
+
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return undefined;
+
+    let disposed = false;
+    let listener: { remove: () => Promise<void> } | undefined;
+    void CapacitorApp.addListener("backButton", () => {
+      const pathname = pathnameRef.current;
+      if (pathname === "/home" || pathname === "/welcome") {
+        void CapacitorApp.exitApp();
+        return;
+      }
+      if (pathname.startsWith("/mis-reportes/")) {
+        navigate("/mis-reportes", { replace: true });
+        return;
+      }
+      navigate("/home", { replace: true });
+    }).then((handle) => {
+      if (disposed) {
+        void handle.remove();
+        return;
+      }
+      listener = handle;
+    });
+
+    return () => {
+      disposed = true;
+      void listener?.remove();
+    };
+  }, [navigate]);
+
+  return null;
+}
+
 function AppRoutes() {
   const { user, loading } = useAuth();
 
@@ -23,6 +67,7 @@ function AppRoutes() {
 
   return (
     <BrowserRouter>
+      <AndroidBackButtonHandler />
       <Routes>
         <Route path="/welcome" element={user ? <Navigate replace to="/home" /> : <WelcomePage />} />
         <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />

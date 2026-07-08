@@ -1,5 +1,6 @@
 import {
   IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonInput,
@@ -14,7 +15,7 @@ import {
   IonToast,
   IonToolbar
 } from "@ionic/react";
-import { Camera, LocateFixed, Send } from "lucide-react";
+import { Camera, CheckCircle, ChevronLeft, LocateFixed, RefreshCw, Send } from "lucide-react";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Geolocation } from "@capacitor/geolocation";
 import { useEffect, useState } from "react";
@@ -31,52 +32,137 @@ export function NewReportPage() {
   const [descripcion, setDescripcion] = useState("");
   const [direccion, setDireccion] = useState("");
   const [location, setLocation] = useState<{ latitud: number; longitud: number }>();
-  const [photoName, setPhotoName] = useState("");
+  const [photoCaptured, setPhotoCaptured] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState("");
+  const [capturingLocation, setCapturingLocation] = useState(false);
+  const [capturingPhoto, setCapturingPhoto] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => setCategories([]));
+    void loadCategories();
   }, []);
 
+  async function loadCategories() {
+    setLoadingCategories(true);
+    setCategoriesError("");
+    try {
+      const loadedCategories = await getCategories();
+      setCategories(loadedCategories);
+      if (loadedCategories.length === 0) {
+        setCategoriesError("No hay categorias disponibles.");
+      }
+    } catch {
+      setCategories([]);
+      setCategoriesError("No se pudieron cargar las categorias.");
+    } finally {
+      setLoadingCategories(false);
+    }
+  }
+
+  function formatCategoryName(value: string) {
+    return value
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  async function ensureLocationPermission() {
+    const current = await Geolocation.checkPermissions();
+    if (current.location === "granted" || current.coarseLocation === "granted") return true;
+
+    const requested = await Geolocation.requestPermissions({ permissions: ["location"] });
+    return requested.location === "granted" || requested.coarseLocation === "granted";
+  }
+
+  async function ensureCameraPermission() {
+    const current = await CapacitorCamera.checkPermissions();
+    if (current.camera === "granted") return true;
+
+    const requested = await CapacitorCamera.requestPermissions({ permissions: ["camera"] });
+    return requested.camera === "granted";
+  }
+
   async function captureLocation() {
-    const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
-    setLocation({
-      latitud: position.coords.latitude,
-      longitud: position.coords.longitude
-    });
+    setCapturingLocation(true);
+    try {
+      const allowed = await ensureLocationPermission();
+      if (!allowed) {
+        setMessage("Permiso de ubicacion denegado.");
+        return;
+      }
+
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 12000 });
+      setLocation({
+        latitud: position.coords.latitude,
+        longitud: position.coords.longitude
+      });
+      setMessage("Ubicacion GPS capturada.");
+    } catch {
+      setMessage("No se pudo capturar la ubicacion GPS.");
+    } finally {
+      setCapturingLocation(false);
+    }
   }
 
   async function capturePhoto() {
-    const photo = await CapacitorCamera.getPhoto({
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Camera,
-      quality: 80
-    });
-    setPhotoName(photo.path ?? photo.webPath ?? "Fotografia capturada");
+    setCapturingPhoto(true);
+    try {
+      const allowed = await ensureCameraPermission();
+      if (!allowed) {
+        setMessage("Permiso de camara denegado.");
+        return;
+      }
+
+      await CapacitorCamera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        quality: 80
+      });
+      setPhotoCaptured(true);
+      setMessage("Fotografia capturada.");
+    } catch {
+      setMessage("No se capturo la fotografia.");
+    } finally {
+      setCapturingPhoto(false);
+    }
   }
 
   async function submitReport() {
+    if (categories.length === 0) {
+      setMessage("Carga una categoria antes de enviar el reporte.");
+      return;
+    }
+
     if (!user || !categoriaId || !location || descripcion.trim().length < 5) {
       setMessage("Completa categoria, descripcion y ubicacion.");
       return;
     }
 
-    await createReport(user, {
-      categoria_id: categoriaId,
-      urgencia,
-      descripcion,
-      latitud: location.latitud,
-      longitud: location.longitud,
-      direccion_aprox: direccion
-    });
-    setMessage("Reporte enviado correctamente.");
-    navigate("/mis-reportes");
+    try {
+      await createReport(user, {
+        categoria_id: categoriaId,
+        urgencia,
+        descripcion,
+        latitud: location.latitud,
+        longitud: location.longitud,
+        direccion_aprox: direccion
+      });
+      setMessage("Reporte enviado correctamente.");
+      navigate("/mis-reportes");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo enviar el reporte.");
+    }
   }
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton fill="clear" onClick={() => navigate("/home")} aria-label="Volver">
+              <ChevronLeft size={24} />
+            </IonButton>
+          </IonButtons>
           <IonTitle>Nuevo reporte</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -84,39 +170,61 @@ export function NewReportPage() {
         <main className="page-body form-flow">
           <IonList inset>
             <IonItem>
-              <IonLabel>Categoría</IonLabel>
-              <IonSelect value={categoriaId} onIonChange={(event) => setCategoriaId(Number(event.detail.value))}>
+              <IonLabel>Categoria</IonLabel>
+              <IonSelect
+                value={categoriaId}
+                disabled={loadingCategories || categories.length === 0}
+                placeholder={loadingCategories ? "Cargando" : "Seleccionar"}
+                onIonChange={(event) => {
+                  const nextValue = Number(event.detail.value);
+                  setCategoriaId(Number.isFinite(nextValue) ? nextValue : undefined);
+                }}
+              >
                 {categories.map((category) => (
-                  <IonSelectOption key={category.id} value={category.id}>{category.nombre}</IonSelectOption>
+                  <IonSelectOption key={category.id} value={category.id}>{formatCategoryName(category.nombre)}</IonSelectOption>
                 ))}
               </IonSelect>
             </IonItem>
+            {categoriesError && (
+              <IonItem lines="none">
+                <IonLabel color="danger">{categoriesError}</IonLabel>
+                <IonButton fill="clear" slot="end" onClick={() => void loadCategories()}>
+                  <RefreshCw size={18} />
+                </IonButton>
+              </IonItem>
+            )}
             <IonItem>
               <IonLabel>Urgencia</IonLabel>
               <IonSelect value={urgencia} onIonChange={(event) => setUrgencia(event.detail.value)}>
                 <IonSelectOption value="baja">Baja</IonSelectOption>
                 <IonSelectOption value="media">Media</IonSelectOption>
                 <IonSelectOption value="alta">Alta</IonSelectOption>
-                <IonSelectOption value="critica">Crítica</IonSelectOption>
+                <IonSelectOption value="critica">Critica</IonSelectOption>
               </IonSelect>
             </IonItem>
             <IonItem>
-              <IonTextarea label="Descripción" labelPlacement="stacked" value={descripcion} onIonInput={(event) => setDescripcion(String(event.detail.value ?? ""))} />
+              <IonTextarea label="Descripcion" labelPlacement="stacked" value={descripcion} onIonInput={(event) => setDescripcion(String(event.detail.value ?? ""))} />
             </IonItem>
             <IonItem>
-              <IonInput label="Dirección aproximada" labelPlacement="stacked" value={direccion} onIonInput={(event) => setDireccion(String(event.detail.value ?? ""))} />
+              <IonInput label="Direccion aproximada" labelPlacement="stacked" value={direccion} onIonInput={(event) => setDireccion(String(event.detail.value ?? ""))} />
             </IonItem>
           </IonList>
 
           <div className="form-actions">
-            <IonButton expand="block" fill="outline" onClick={captureLocation}>
-              <LocateFixed size={18} />
-              <span>{location ? "Ubicación capturada" : "Capturar ubicación GPS"}</span>
+            <IonButton expand="block" fill="outline" color={location ? "success" : "primary"} disabled={capturingLocation} onClick={captureLocation}>
+              {location ? <CheckCircle size={18} /> : <LocateFixed size={18} />}
+              <span>{capturingLocation ? "Capturando ubicacion" : location ? "Ubicacion capturada" : "Capturar ubicacion GPS"}</span>
             </IonButton>
-            <IonButton expand="block" fill="outline" onClick={capturePhoto}>
-              <Camera size={18} />
-              <span>{photoName || "Capturar fotografía"}</span>
+            {location && (
+              <p className="form-action-status success-status">
+                GPS listo: {location.latitud.toFixed(5)}, {location.longitud.toFixed(5)}
+              </p>
+            )}
+            <IonButton expand="block" fill="outline" color={photoCaptured ? "success" : "primary"} disabled={capturingPhoto} onClick={capturePhoto}>
+              {photoCaptured ? <CheckCircle size={18} /> : <Camera size={18} />}
+              <span>{capturingPhoto ? "Abriendo camara" : photoCaptured ? "Fotografia capturada" : "Capturar fotografia"}</span>
             </IonButton>
+            {photoCaptured && <p className="form-action-status success-status">Fotografia capturada en el dispositivo.</p>}
             <IonButton expand="block" onClick={submitReport}>
               <Send size={18} />
               <span>Enviar reporte</span>

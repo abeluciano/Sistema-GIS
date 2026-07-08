@@ -46,3 +46,18 @@ npm test -w backend
 ```
 
 Cubren health check, OpenAPI, login administrativo, rechazo de credenciales invalidas y middleware Firebase con verificador inyectado.
+
+## Fase 4
+
+La suite backend agrega pruebas unitarias del servicio estadistico exploratorio:
+
+```bash
+npm test -w backend
+```
+
+Casos cubiertos:
+
+- Chi-cuadrado con tabla de contingencia.
+- Mann-Whitney U.
+- Kruskal-Wallis.
+- Spearman.

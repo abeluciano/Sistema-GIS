@@ -9,7 +9,15 @@ export const openApiDocument = {
   tags: [
     { name: "Health" },
     { name: "Dashboard Auth" },
-    { name: "Firebase Auth" }
+    { name: "Firebase Auth" },
+    { name: "Usuarios" },
+    { name: "Catalogos" },
+    { name: "Reportes" },
+    { name: "Fotos" },
+    { name: "Indicadores" },
+    { name: "GIS" },
+    { name: "Estadistica" },
+    { name: "Exportacion" }
   ],
   components: {
     securitySchemes: {
@@ -90,6 +98,99 @@ export const openApiDocument = {
           "401": { description: "Token invalido." }
         }
       }
+    },
+    "/auth/firebase/sync": {
+      post: {
+        tags: ["Firebase Auth"],
+        security: [{ FirebaseBearer: [] }],
+        summary: "Sincroniza o crea el perfil ciudadano desde Firebase.",
+        responses: { "201": { description: "Perfil sincronizado." } }
+      }
+    },
+    "/me": {
+      get: {
+        tags: ["Firebase Auth"],
+        security: [{ FirebaseBearer: [] }],
+        summary: "Obtiene el perfil ciudadano sincronizado.",
+        responses: { "200": { description: "Perfil ciudadano." } }
+      }
+    },
+    "/usuarios": {
+      get: {
+        tags: ["Usuarios"],
+        security: [{ AdminBearer: [] }],
+        summary: "Lista usuarios para dashboard."
+      }
+    },
+    "/categorias": {
+      get: { tags: ["Catalogos"], summary: "Lista categorias." },
+      post: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Crea categoria." }
+    },
+    "/categorias/{id}": {
+      put: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Actualiza categoria." }
+    },
+    "/zonas": {
+      get: { tags: ["Catalogos"], summary: "Lista zonas." },
+      post: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Crea zona." }
+    },
+    "/zonas/{id}": {
+      put: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Actualiza zona." }
+    },
+    "/reportes": {
+      get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Lista reportes con filtros." },
+      post: { tags: ["Reportes"], security: [{ FirebaseBearer: [] }], summary: "Crea reporte ciudadano georreferenciado." }
+    },
+    "/mis-reportes": {
+      get: { tags: ["Reportes"], security: [{ FirebaseBearer: [] }], summary: "Lista reportes del ciudadano autenticado." }
+    },
+    "/reportes/{id}": {
+      get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Obtiene detalle de reporte." }
+    },
+    "/reportes/{id}/validar": {
+      patch: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Valida reporte." }
+    },
+    "/reportes/{id}/rechazar": {
+      patch: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Rechaza reporte." }
+    },
+    "/reportes/{id}/atender": {
+      patch: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Marca reporte como atendido." }
+    },
+    "/reportes/{id}/archivar": {
+      patch: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Archiva reporte." }
+    },
+    "/reportes/{id}/fotos": {
+      get: { tags: ["Fotos"], security: [{ AdminBearer: [] }], summary: "Lista fotos de reporte." },
+      post: { tags: ["Fotos"], security: [{ FirebaseBearer: [] }], summary: "Agrega fotografia al reporte." }
+    },
+    "/reportes/{id}/historial": {
+      get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Lista historial del reporte." }
+    },
+    "/indicadores/resumen": {
+      get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "KPIs principales." }
+    },
+    "/gis/reportes.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Reportes en GeoJSON." }
+    },
+    "/gis/zonas.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Zonas en GeoJSON." }
+    },
+    "/gis/heatmap": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Puntos agregados para mapa de calor." }
+    },
+    "/analisis/estadistico/chi-cuadrado": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Asociacion entre variables categoricas." }
+    },
+    "/analisis/estadistico/mann-whitney": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Comparacion entre dos grupos independientes." }
+    },
+    "/analisis/estadistico/kruskal-wallis": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Comparacion entre tres o mas grupos." }
+    },
+    "/analisis/estadistico/spearman": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Relacion entre variables ordinales o no normales." }
+    },
+    "/export/reportes.csv": {
+      get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta reportes en CSV." }
     }
   }
 };

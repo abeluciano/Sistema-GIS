@@ -72,6 +72,8 @@ La documentacion formal se expondra con Scalar/OpenAPI en fases posteriores.
 - `GET /analisis/estadistico/wilcoxon`
 - `GET /analisis/estadistico/friedman`
 
+Estos endpoints son solo para dashboard administrativo. La interfaz debe presentarlos como preguntas comprensibles para gestores; los nombres tecnicos quedan como detalle metodologico.
+
 ## Exportacion y docs
 
 - `GET /export/reportes.csv`

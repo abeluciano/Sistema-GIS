@@ -98,3 +98,21 @@ npm run check:structure
 ```
 
 La prueba del dashboard cubre el panel de analisis estadistico con preguntas de gestion y detalle metodologico separado.
+
+## Fase 7
+
+Validacion de seguridad y operacion:
+
+```bash
+npm run security:audit
+npm run check:structure
+npm test -w backend
+```
+
+Prueba de carga humo con backend levantado:
+
+```bash
+npm run load:smoke
+```
+
+Resultado registrado: 50 solicitudes a `/health`, concurrencia 5, 0 fallos.

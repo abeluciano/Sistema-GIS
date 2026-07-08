@@ -10,6 +10,8 @@ describe("health routes", () => {
     expect(response.body.status).toBe("ok");
     expect(response.body.service).toBe("sistema-gis-backend");
     expect(response.body.timestamp).toBeDefined();
+    expect(response.headers["x-request-id"]).toBeDefined();
+    expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
   test("GET /openapi.json returns the OpenAPI document", async () => {

@@ -14,7 +14,11 @@ const envSchema = z.object({
   FIREBASE_PRIVATE_KEY: z.string().optional(),
   UPLOADS_DIR: z.string().default("backend/uploads"),
   MAX_REPORT_PHOTOS: z.coerce.number().int().min(1).max(3).default(3),
-  MAX_UPLOAD_MB: z.coerce.number().int().positive().default(5)
+  MAX_UPLOAD_MB: z.coerce.number().int().positive().default(5),
+  UPLOAD_ORPHAN_RETENTION_DAYS: z.coerce.number().int().min(1).default(7),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20)
 });
 
 export const env = envSchema.parse(process.env);

@@ -2,12 +2,13 @@ import { apiReference } from "@scalar/express-api-reference";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { openApiDocument } from "./docs/openapi.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+import { generalRateLimiter, authRateLimiter } from "./middlewares/rateLimiters.js";
+import { requestContext } from "./middlewares/requestContext.js";
 import { userRepository } from "./repositories/userRepository.js";
 import { adminAuthRoutes } from "./routes/adminAuthRoutes.js";
 import { catalogRoutes } from "./routes/catalogRoutes.js";
@@ -30,14 +31,17 @@ export function createApp(options = {}) {
   };
   app.locals.firebaseAuth = options.firebaseAuth ?? null;
 
+  app.use(requestContext);
   app.use(helmet());
   app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser(env.ADMIN_SESSION_SECRET));
-  app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
+  app.use(generalRateLimiter);
+  app.use("/admin/login", authRateLimiter);
 
   if (env.NODE_ENV !== "test") {
-    app.use(morgan("combined"));
+    morgan.token("id", (req) => req.id);
+    app.use(morgan(":id :remote-addr :method :url :status :res[content-length] - :response-time ms"));
   }
 
   app.get("/openapi.json", (_req, res) => res.json(openApiDocument));

@@ -1,6 +1,9 @@
-# Endpoints previstos
+# Endpoints
 
-La documentacion formal se expondra con Scalar/OpenAPI en fases posteriores.
+La documentacion formal se expone con Scalar/OpenAPI en:
+
+- `GET /docs`
+- `GET /openapi.json`
 
 ## Salud
 
@@ -79,3 +82,8 @@ Estos endpoints son solo para dashboard administrativo. La interfaz debe present
 - `GET /export/reportes.csv`
 - `GET /docs`
 - `GET /openapi.json`
+
+## Roles
+
+- Ciudadano: `POST /reportes`, `GET /mis-reportes`, `POST /reportes/:id/fotos`, `POST /auth/firebase/sync`, `GET /me`.
+- Gestor o administrador: reportes administrativos, GIS, indicadores, estadistica, usuarios, catalogos y exportaciones.

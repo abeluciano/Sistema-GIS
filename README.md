@@ -41,14 +41,53 @@ Archivos de ejemplo:
 ## Comandos disponibles
 
 ```bash
+npm install
 npm run check:structure
-npm test
+npm run security:audit
+npm test -w backend
+npm test -w dashboard
+npm test -w mobile
+npm run build -w dashboard
+npm run build -w mobile
 ```
 
-En esta fase no se instalan dependencias de framework. Los proyectos `backend`, `dashboard` y `mobile` quedan preparados para implementarse en fases posteriores.
+Backend:
+
+```bash
+npm run dev -w backend
+npm run db:check -w backend
+npm run db:migrate -w backend
+```
+
+Dashboard:
+
+```bash
+npm run dev -w dashboard
+```
+
+App movil:
+
+```bash
+npm run dev -w mobile
+```
 
 ## Estado de fases
 
 - Fase 0: planificacion y trazabilidad con tesis revisada hasta antes de "Pruebas del Sistema".
 - Fase 1: preparacion del repositorio y estructura base.
+- Fase 2: validacion y migracion PostgreSQL/PostGIS.
+- Fase 3: backend base, autenticacion y Scalar/OpenAPI.
+- Fase 4: reportes, GIS, indicadores, estadistica exploratoria y exportacion.
+- Fase 5: app movil ciudadana Ionic + Capacitor.
+- Fase 6: dashboard web administrativo.
+- Fase 7: seguridad, operacion, auditoria y carga humo.
 
+## Documentacion
+
+- `docs/arquitectura.md`
+- `docs/endpoints.md`
+- `docs/pruebas.md`
+- `docs/despliegue.md`
+- `docs/seguridad-operacion.md`
+- `docs/trazabilidad-tesis.md`
+- `docs/reportes/`

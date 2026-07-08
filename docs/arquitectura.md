@@ -8,7 +8,7 @@ El sistema se organiza en tres capas:
 
 La app movil se enfoca en ciudadanos reportadores. El dashboard queda reservado para gestores y administradores. Ambos clientes se comunican con la API mediante HTTPS/TLS en entornos desplegados.
 
-## Componentes previstos
+## Componentes implementados
 
 - App movil: Ionic + React + Capacitor, Firebase Auth con Google Sign-In, GPS, camara, reportes y emergencia.
 - Dashboard: React + Leaflet, mapa, filtros, reportes, indicadores y analisis estadistico exploratorio para gestores.
@@ -20,3 +20,5 @@ La app movil se enfoca en ciudadanos reportadores. El dashboard queda reservado 
 El analisis GIS incluye visualizacion georreferenciada, GeoJSON, filtros, mapas de calor, hotspots, coldspots, analisis espacial exploratorio, Moran's I y Getis-Ord Gi* segun viabilidad.
 
 El analisis estadistico exploratorio sera exclusivo del dashboard administrativo. La interfaz debe presentar preguntas comprensibles para gestores, y el backend seleccionara o validara internamente la prueba estadistica pertinente.
+
+El MVP inicia con visualizacion GeoJSON, filtros, agregaciones espaciales e indicadores basicos, dejando preparada la estructura para incorporar progresivamente mapas de calor, Moran's I y Getis-Ord Gi*, sin que el sistema se enfoque en modelos predictivos.

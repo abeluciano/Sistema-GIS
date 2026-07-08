@@ -21,6 +21,7 @@ Limite de lectura usado para desarrollo inicial: hasta antes de la seccion `3.4.
 - Dashboard: autenticacion administrativa interna con password hasheado.
 - Fotos: storage local controlado, sin guardar binarios en PostgreSQL.
 - Analisis estadistico exploratorio: solo en dashboard para gestores y administradores, con interpretaciones en lenguaje simple y sin conclusiones causales.
+- El sistema no se presenta como predictivo ni como machine learning. El analisis GIS y estadistico se documenta como exploratorio y de apoyo a la toma de decisiones.
 
 ## Fase 2 - Base de datos
 
@@ -31,3 +32,10 @@ La validacion del esquema toma como referencia el modelo de datos de la tesis y 
 - `reporte_fotos.ruta_relativa` almacena referencias al storage local controlado.
 - Las geometrias usan SRID 4326.
 - El usuario `admin/admin` se considera credencial academica de prototipo, se siembra de forma explicita y se guarda con hash bcrypt.
+
+## Modulos implementados
+
+- Backend REST con Scalar/OpenAPI.
+- App movil ciudadana para reportar, consultar reportes propios y acceder a emergencia.
+- Dashboard administrativo para gestion, mapa, indicadores y analisis estadistico.
+- Seguridad operativa con auditoria local de secretos, rate limiting, request IDs y limpieza de uploads huerfanos en dry-run.

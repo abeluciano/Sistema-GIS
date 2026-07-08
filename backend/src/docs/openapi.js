@@ -122,6 +122,15 @@ export const openApiDocument = {
         summary: "Lista usuarios para dashboard."
       }
     },
+    "/usuarios/{id}": {
+      get: { tags: ["Usuarios"], security: [{ AdminBearer: [] }], summary: "Obtiene usuario por ID." }
+    },
+    "/usuarios/{id}/rol": {
+      patch: { tags: ["Usuarios"], security: [{ AdminBearer: [] }], summary: "Actualiza rol de usuario." }
+    },
+    "/usuarios/{id}/estado": {
+      patch: { tags: ["Usuarios"], security: [{ AdminBearer: [] }], summary: "Activa o desactiva usuario." }
+    },
     "/categorias": {
       get: { tags: ["Catalogos"], summary: "Lista categorias." },
       post: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Crea categoria." }
@@ -165,8 +174,20 @@ export const openApiDocument = {
     "/reportes/{id}/historial": {
       get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Lista historial del reporte." }
     },
+    "/reportes/{id}/estado": {
+      patch: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Cambia estado de reporte desde dashboard." }
+    },
     "/indicadores/resumen": {
       get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "KPIs principales." }
+    },
+    "/indicadores/por-categoria": {
+      get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "Conteo de reportes por categoria." }
+    },
+    "/indicadores/por-zona": {
+      get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "Conteo de reportes por zona." }
+    },
+    "/indicadores/por-periodo": {
+      get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "Conteo de reportes por dia o mes." }
     },
     "/gis/reportes.geojson": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Reportes en GeoJSON." }
@@ -176,6 +197,9 @@ export const openApiDocument = {
     },
     "/gis/heatmap": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Puntos agregados para mapa de calor." }
+    },
+    "/gis/analisis/kde": {
+      post: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Registra analisis espacial exploratorio tipo KDE basico." }
     },
     "/analisis/estadistico/chi-cuadrado": {
       get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Asociacion entre variables categoricas." }
@@ -188,6 +212,12 @@ export const openApiDocument = {
     },
     "/analisis/estadistico/spearman": {
       get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Relacion entre variables ordinales o no normales." }
+    },
+    "/analisis/estadistico/wilcoxon": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Comparacion antes-despues si existen datos pareados suficientes." }
+    },
+    "/analisis/estadistico/friedman": {
+      get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Comparacion de tres o mas mediciones relacionadas si existen datos suficientes." }
     },
     "/export/reportes.csv": {
       get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta reportes en CSV." }

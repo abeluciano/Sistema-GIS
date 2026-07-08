@@ -106,7 +106,8 @@ const requiredPaths = [
   "docs/seguridad-operacion.md",
   "docs/despliegue.md",
   "docs/trazabilidad-tesis.md",
-  "docs/reportes/fase-8.md"
+  "docs/reportes/fase-8.md",
+  "docs/reportes/fase-9.md"
 ];
 
 const forbiddenPaths = [

@@ -226,7 +226,7 @@ export async function getByPeriod(token: string) {
 
 export async function getReportGeoJson(token: string, filters: ReportFilters) {
   return request<GeoJSON.FeatureCollection>(
-    `/gis/reportes.geojson${buildQuery({ estado: filters.estado })}`,
+    `/gis/reportes.geojson${buildQuery({ ...filters })}`,
     { headers: authHeaders(token) }
   );
 }
@@ -235,8 +235,18 @@ export async function getZonesGeoJson(token: string) {
   return request<GeoJSON.FeatureCollection>("/gis/zonas.geojson", { headers: authHeaders(token) });
 }
 
-export async function getHeatmap(token: string) {
-  return request<{ data: HeatPoint[] }>("/gis/heatmap", { headers: authHeaders(token) });
+export async function getHeatmap(token: string, filters: ReportFilters) {
+  return request<{ data: HeatPoint[] }>(
+    `/gis/heatmap${buildQuery({ ...filters })}`,
+    { headers: authHeaders(token) }
+  );
+}
+
+export async function getZoneConcentration(token: string, filters: ReportFilters) {
+  return request<GeoJSON.FeatureCollection>(
+    `/gis/concentracion-zonas.geojson${buildQuery({ ...filters })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
 export async function runStatisticalAnalysis(token: string, requestConfig: AnalysisRequest) {

@@ -23,5 +23,6 @@ describe("health routes", () => {
     expect(response.body.paths["/health"]).toBeDefined();
     expect(response.body.paths["/zonas/reasignar"]).toBeDefined();
     expect(response.body.paths["/reportes/{id}/fotos/{fotoId}/archivo"]).toBeDefined();
+    expect(response.body.paths["/gis/concentracion-zonas.geojson"]).toBeDefined();
   });
 });

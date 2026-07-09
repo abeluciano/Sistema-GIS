@@ -207,6 +207,9 @@ export const openApiDocument = {
     "/gis/heatmap": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Puntos agregados para mapa de calor." }
     },
+    "/gis/concentracion-zonas.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Hotspots y coldspots exploratorios por conteos estandarizados." }
+    },
     "/gis/analisis/kde": {
       post: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Registra analisis espacial exploratorio tipo KDE basico." }
     },

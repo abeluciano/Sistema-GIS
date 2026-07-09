@@ -24,6 +24,7 @@ import {
   getSummary,
   getZones,
   getZonesGeoJson,
+  getZoneConcentration,
   loginAdmin,
   runStatisticalAnalysis,
   type AdminUser,
@@ -65,6 +66,7 @@ export default function App() {
   const [reportsGeoJson, setReportsGeoJson] = useState<GeoJSON.FeatureCollection>();
   const [zonesGeoJson, setZonesGeoJson] = useState<GeoJSON.FeatureCollection>();
   const [heatmap, setHeatmap] = useState<HeatPoint[]>([]);
+  const [zoneConcentration, setZoneConcentration] = useState<GeoJSON.FeatureCollection>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -85,7 +87,8 @@ export default function App() {
         byPeriodResponse,
         reportsGeo,
         zonesGeo,
-        heatResponse
+        heatResponse,
+        concentrationResponse
       ] = await Promise.all([
         getReports(token, filters, page, pageSize),
         getCategories(),
@@ -96,7 +99,8 @@ export default function App() {
         getByPeriod(token),
         getReportGeoJson(token, filters),
         getZonesGeoJson(token),
-        getHeatmap(token)
+        getHeatmap(token, filters),
+        getZoneConcentration(token, filters)
       ]);
 
       setReports(reportsResponse.data);
@@ -111,6 +115,7 @@ export default function App() {
       setReportsGeoJson(reportsGeo);
       setZonesGeoJson(zonesGeo);
       setHeatmap(heatResponse.data);
+      setZoneConcentration(concentrationResponse);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "No se pudo cargar el dashboard.");
     } finally {
@@ -246,7 +251,12 @@ export default function App() {
         </section>
 
         <section id="mapa" className="workspace-section two-column">
-          <MapPanel reportsGeoJson={reportsGeoJson} zonesGeoJson={zonesGeoJson} heatmap={heatmap} />
+          <MapPanel
+            reportsGeoJson={reportsGeoJson}
+            zonesGeoJson={zonesGeoJson}
+            zoneConcentration={zoneConcentration}
+            heatmap={heatmap}
+          />
           <ReportsTable
             reports={reports}
             pagination={reportPagination}

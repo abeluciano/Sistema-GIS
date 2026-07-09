@@ -1,13 +1,38 @@
 import L from "leaflet";
+import "leaflet.heat";
+import { createLayerComponent } from "@react-leaflet/core";
 import { useEffect } from "react";
-import { CircleMarker, GeoJSON, LayerGroup, LayersControl, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
+import { GeoJSON, LayersControl, MapContainer, TileLayer, useMap } from "react-leaflet";
 import type { HeatPoint } from "../services/api";
 
 type MapPanelProps = {
   reportsGeoJson?: GeoJSON.FeatureCollection;
   zonesGeoJson?: GeoJSON.FeatureCollection;
+  zoneConcentration?: GeoJSON.FeatureCollection;
   heatmap: HeatPoint[];
 };
+
+type HeatLayerProps = {
+  points: HeatPoint[];
+};
+
+const HeatLayer = createLayerComponent<L.HeatLayer, HeatLayerProps>(
+  ({ points }, context) => ({
+    instance: L.heatLayer(
+      points.map((point) => [point.latitud, point.longitud, point.intensidad]),
+      {
+        radius: 28,
+        blur: 22,
+        minOpacity: 0.28,
+        gradient: { 0.15: "#2563eb", 0.45: "#22c55e", 0.7: "#facc15", 1: "#dc2626" }
+      }
+    ),
+    context
+  }),
+  (instance, props) => {
+    instance.setLatLngs(props.points.map((point) => [point.latitud, point.longitud, point.intensidad]));
+  }
+);
 
 function FitToData({ data }: { data?: GeoJSON.FeatureCollection }) {
   const map = useMap();
@@ -34,7 +59,17 @@ function reportPoint(feature: GeoJSON.Feature, latlng: L.LatLngExpression) {
   });
 }
 
-export function MapPanel({ reportsGeoJson, zonesGeoJson, heatmap }: MapPanelProps) {
+function concentrationStyle(feature?: GeoJSON.Feature) {
+  const classification = feature?.properties?.clasificacion;
+  const fillColor = classification === "hotspot"
+    ? "#dc2626"
+    : classification === "coldspot"
+      ? "#2563eb"
+      : "#9ca3af";
+  return { color: fillColor, weight: 2, fillColor, fillOpacity: 0.32 };
+}
+
+export function MapPanel({ reportsGeoJson, zonesGeoJson, zoneConcentration, heatmap }: MapPanelProps) {
   return (
     <section className="panel map-panel" aria-label="Mapa GIS">
       <header className="panel-header">
@@ -76,23 +111,32 @@ export function MapPanel({ reportsGeoJson, zonesGeoJson, heatmap }: MapPanelProp
               />
             </LayersControl.Overlay>
           ) : null}
+          {zoneConcentration ? (
+            <LayersControl.Overlay name="Hotspots y coldspots">
+              <GeoJSON
+                key={`concentration-${JSON.stringify(zoneConcentration.features.map((feature) => feature.properties))}`}
+                data={zoneConcentration}
+                style={concentrationStyle}
+                onEachFeature={(feature, layer) => {
+                  const props = feature.properties ?? {};
+                  layer.bindPopup(
+                    `<strong>${props.nombre ?? "Zona"}</strong><br/>Reportes: ${props.total ?? 0}<br/>Clasificacion: ${props.clasificacion ?? "neutral"}<br/>Puntuacion z: ${props.z_score ?? 0}`
+                  );
+                }}
+              />
+            </LayersControl.Overlay>
+          ) : null}
           <LayersControl.Overlay checked name="Concentracion">
-            <LayerGroup>
-              {heatmap.map((point) => (
-                <CircleMarker
-                  key={`${point.latitud}-${point.longitud}-${point.intensidad}`}
-                  center={[point.latitud, point.longitud]}
-                  radius={Math.max(6, Math.min(24, point.intensidad * 4))}
-                  pathOptions={{ color: "#f97316", fillColor: "#f97316", fillOpacity: 0.28, weight: 1 }}
-                >
-                  <Popup>Intensidad: {point.intensidad}</Popup>
-                </CircleMarker>
-              ))}
-            </LayerGroup>
+            <HeatLayer points={heatmap} />
           </LayersControl.Overlay>
         </LayersControl>
         <FitToData data={zonesGeoJson?.features.length ? zonesGeoJson : reportsGeoJson} />
       </MapContainer>
+      <div className="map-legend" aria-label="Leyenda de concentracion">
+        <span><i className="legend-hotspot" />Hotspot</span>
+        <span><i className="legend-neutral" />Neutral</span>
+        <span><i className="legend-coldspot" />Coldspot</span>
+      </div>
     </section>
   );
 }

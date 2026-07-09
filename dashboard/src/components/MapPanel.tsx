@@ -3,12 +3,14 @@ import "leaflet.heat";
 import { createLayerComponent } from "@react-leaflet/core";
 import { useEffect } from "react";
 import { GeoJSON, LayersControl, MapContainer, TileLayer, useMap } from "react-leaflet";
-import type { HeatPoint } from "../services/api";
+import type { HeatPoint, SpatialGeoJson } from "../services/api";
 
 type MapPanelProps = {
   reportsGeoJson?: GeoJSON.FeatureCollection;
   zonesGeoJson?: GeoJSON.FeatureCollection;
   zoneConcentration?: GeoJSON.FeatureCollection;
+  moranLocal?: SpatialGeoJson;
+  getisOrd?: SpatialGeoJson;
   heatmap: HeatPoint[];
 };
 
@@ -69,7 +71,42 @@ function concentrationStyle(feature?: GeoJSON.Feature) {
   return { color: fillColor, weight: 2, fillColor, fillOpacity: 0.32 };
 }
 
-export function MapPanel({ reportsGeoJson, zonesGeoJson, zoneConcentration, heatmap }: MapPanelProps) {
+function moranStyle(feature?: GeoJSON.Feature) {
+  const colors: Record<string, string> = {
+    "alto-alto": "#b91c1c",
+    "bajo-bajo": "#1d4ed8",
+    "bajo-alto": "#7c3aed",
+    "alto-bajo": "#d97706",
+    no_significativo: "#9ca3af"
+  };
+  const classification = String(feature?.properties?.classification ?? "no_significativo");
+  return {
+    color: colors[classification] ?? "#9ca3af",
+    weight: classification === "no_significativo" ? 0.5 : 2,
+    fillColor: colors[classification] ?? "#9ca3af",
+    fillOpacity: classification === "no_significativo" ? 0.04 : 0.48
+  };
+}
+
+function getisStyle(feature?: GeoJSON.Feature) {
+  const classification = String(feature?.properties?.classification ?? "no_significativo");
+  const color = classification === "hotspot" ? "#dc2626" : classification === "coldspot" ? "#2563eb" : "#9ca3af";
+  return {
+    color,
+    weight: classification === "no_significativo" ? 0.5 : 2,
+    fillColor: color,
+    fillOpacity: classification === "no_significativo" ? 0.04 : 0.52
+  };
+}
+
+export function MapPanel({
+  reportsGeoJson,
+  zonesGeoJson,
+  zoneConcentration,
+  moranLocal,
+  getisOrd,
+  heatmap
+}: MapPanelProps) {
   return (
     <section className="panel map-panel" aria-label="Mapa GIS">
       <header className="panel-header">
@@ -126,6 +163,36 @@ export function MapPanel({ reportsGeoJson, zonesGeoJson, zoneConcentration, heat
               />
             </LayersControl.Overlay>
           ) : null}
+          {moranLocal ? (
+            <LayersControl.Overlay name="Moran local (FDR)">
+              <GeoJSON
+                key={`moran-${moranLocal.tamanio_m}-${moranLocal.analysis.significantUnits}`}
+                data={moranLocal}
+                style={moranStyle}
+                onEachFeature={(feature, layer) => {
+                  const props = feature.properties ?? {};
+                  layer.bindPopup(
+                    `<strong>${props.codigo ?? "Celda"}</strong><br/>Clase: ${props.classification ?? "-"}<br/>Moran local: ${props.localI ?? "-"}<br/>p ajustado: ${props.pAdjusted ?? "-"}`
+                  );
+                }}
+              />
+            </LayersControl.Overlay>
+          ) : null}
+          {getisOrd ? (
+            <LayersControl.Overlay name="Getis-Ord Gi* (FDR)">
+              <GeoJSON
+                key={`getis-${getisOrd.tamanio_m}-${getisOrd.analysis.significantUnits}`}
+                data={getisOrd}
+                style={getisStyle}
+                onEachFeature={(feature, layer) => {
+                  const props = feature.properties ?? {};
+                  layer.bindPopup(
+                    `<strong>${props.codigo ?? "Celda"}</strong><br/>Clase: ${props.classification ?? "-"}<br/>Gi*: ${props.giStar ?? "-"}<br/>p ajustado: ${props.pAdjusted ?? "-"}`
+                  );
+                }}
+              />
+            </LayersControl.Overlay>
+          ) : null}
           <LayersControl.Overlay checked name="Concentracion">
             <HeatLayer points={heatmap} />
           </LayersControl.Overlay>
@@ -133,9 +200,9 @@ export function MapPanel({ reportsGeoJson, zonesGeoJson, zoneConcentration, heat
         <FitToData data={zonesGeoJson?.features.length ? zonesGeoJson : reportsGeoJson} />
       </MapContainer>
       <div className="map-legend" aria-label="Leyenda de concentracion">
-        <span><i className="legend-hotspot" />Hotspot</span>
-        <span><i className="legend-neutral" />Neutral</span>
-        <span><i className="legend-coldspot" />Coldspot</span>
+        <span><i className="legend-hotspot" />Alto / hotspot</span>
+        <span><i className="legend-neutral" />No significativo</span>
+        <span><i className="legend-coldspot" />Bajo / coldspot</span>
       </div>
     </section>
   );

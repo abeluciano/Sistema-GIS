@@ -160,6 +160,38 @@ export type StatisticalResult = {
   [key: string]: unknown;
 };
 
+export type SpatialGlobalResult = {
+  canRun: boolean;
+  test?: string;
+  method?: string;
+  sampleSize?: number;
+  permutations?: number;
+  statistic?: number;
+  expected?: number;
+  zScore?: number;
+  pValue?: number;
+  significant?: boolean;
+  interpretation?: string;
+  warning?: string;
+  message?: string;
+};
+
+export type SpatialGeoJson = GeoJSON.FeatureCollection & {
+  tamanio_m?: number;
+  analysis: {
+    canRun: boolean;
+    test?: string;
+    method?: string;
+    sampleSize?: number;
+    permutations?: number;
+    multipleTesting?: string;
+    significantUnits?: number;
+    interpretation?: string;
+    warning?: string;
+    message?: string;
+  };
+};
+
 export type AnalysisRequest = {
   endpoint: string;
   params?: Record<string, string | undefined>;
@@ -327,6 +359,47 @@ export async function runStatisticalAnalysis(token: string, requestConfig: Analy
     }
     throw error;
   }
+}
+
+function spatialQuery(size: 250 | 500, filters: ReportFilters) {
+  return {
+    tamanio: String(size),
+    estado: filters.estado,
+    categoria_id: filters.categoria_id,
+    zona_id: filters.zona_id,
+    fecha_inicio: filters.fecha_inicio,
+    fecha_fin: filters.fecha_fin
+  };
+}
+
+async function spatialRequest<T>(token: string, path: string) {
+  try {
+    return await request<T>(path, { headers: authHeaders(token) });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 422) return error.details as T;
+    throw error;
+  }
+}
+
+export function getMoranGlobal(token: string, size: 250 | 500, filters: ReportFilters) {
+  return spatialRequest<SpatialGlobalResult>(
+    token,
+    `/analisis/espacial/moran${buildQuery(spatialQuery(size, filters))}`
+  );
+}
+
+export function getMoranLocal(token: string, size: 250 | 500, filters: ReportFilters) {
+  return spatialRequest<SpatialGeoJson>(
+    token,
+    `/analisis/espacial/moran-local.geojson${buildQuery(spatialQuery(size, filters))}`
+  );
+}
+
+export function getGetisOrd(token: string, size: 250 | 500, filters: ReportFilters) {
+  return spatialRequest<SpatialGeoJson>(
+    token,
+    `/analisis/espacial/getis-ord.geojson${buildQuery(spatialQuery(size, filters))}`
+  );
 }
 
 export async function changeReportState(token: string, reportId: number, estado: EstadoReporte) {

@@ -700,6 +700,53 @@ td span {
   color: #667085;
 }
 
+.spatial-analysis-panel {
+  padding-bottom: 14px;
+}
+
+.spatial-analysis-form {
+  display: grid;
+  grid-template-columns: minmax(320px, 2fr) minmax(150px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+}
+
+.spatial-analysis-result {
+  margin: 0 14px;
+  padding: 14px;
+  border: 1px solid #cfd9e6;
+  border-radius: 8px;
+  background: #f7f9fc;
+}
+
+.spatial-analysis-result > strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.spatial-analysis-result dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.spatial-analysis-result dt {
+  color: #667085;
+  font-size: 12px;
+}
+
+.spatial-analysis-result dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.spatial-analysis-result small {
+  color: #667085;
+}
+
 .method-note {
   color: #475467;
 }
@@ -728,7 +775,8 @@ td span {
   .kpi-grid,
   .charts-grid,
   .statistics-form,
-  .comparison-form {
+  .comparison-form,
+  .spatial-analysis-form {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -756,6 +804,8 @@ td span {
   .statistics-form,
   .comparison-form,
   .comparison-summary,
+  .spatial-analysis-form,
+  .spatial-analysis-result dl,
   .statistics-result dl {
     grid-template-columns: 1fr;
   }

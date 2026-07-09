@@ -6,6 +6,7 @@ import { KpiGrid } from "./components/KpiGrid";
 import { LoginPanel } from "./components/LoginPanel";
 import { MapPanel } from "./components/MapPanel";
 import { ReportsTable } from "./components/ReportsTable";
+import { SpatialAnalysisPanel } from "./components/SpatialAnalysisPanel";
 import { StatisticalAnalysisPanel } from "./components/StatisticalAnalysisPanel";
 import { TemporalComparisonPanel } from "./components/TemporalComparisonPanel";
 import {
@@ -19,6 +20,9 @@ import {
   getCategories,
   getHeatmap,
   getMe,
+  getGetisOrd,
+  getMoranGlobal,
+  getMoranLocal,
   getPeriodComparison,
   getReportGeoJson,
   getReportPhotoBlob,
@@ -42,6 +46,7 @@ import {
   type ReportPagination,
   type ReportPhotoView,
   type Summary,
+  type SpatialGeoJson,
   type Zone
 } from "./services/api";
 
@@ -71,6 +76,8 @@ export default function App() {
   const [zonesGeoJson, setZonesGeoJson] = useState<GeoJSON.FeatureCollection>();
   const [heatmap, setHeatmap] = useState<HeatPoint[]>([]);
   const [zoneConcentration, setZoneConcentration] = useState<GeoJSON.FeatureCollection>();
+  const [moranLocal, setMoranLocal] = useState<SpatialGeoJson>();
+  const [getisOrd, setGetisOrd] = useState<SpatialGeoJson>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -274,6 +281,8 @@ export default function App() {
             reportsGeoJson={reportsGeoJson}
             zonesGeoJson={zonesGeoJson}
             zoneConcentration={zoneConcentration}
+            moranLocal={moranLocal}
+            getisOrd={getisOrd}
             heatmap={heatmap}
           />
           <ReportsTable
@@ -298,6 +307,15 @@ export default function App() {
         </section>
 
         <section id="estadistica" className="workspace-section">
+          <SpatialAnalysisPanel
+            runGlobal={(size) => getMoranGlobal(token, size, filters)}
+            runLocal={(size) => getMoranLocal(token, size, filters)}
+            runGetis={(size) => getGetisOrd(token, size, filters)}
+            onLayer={(mode, data) => {
+              if (mode === "local") setMoranLocal(data);
+              else setGetisOrd(data);
+            }}
+          />
           <StatisticalAnalysisPanel
             categories={categories}
             zones={zones}

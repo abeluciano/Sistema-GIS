@@ -26,6 +26,9 @@ export type Zone = {
   id: number;
   nombre: string;
   descripcion?: string | null;
+  tipo?: string;
+  fuente?: string | null;
+  referencia?: string | null;
   activo: boolean;
   geojson?: GeoJSON.Geometry | null;
 };

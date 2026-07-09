@@ -1,6 +1,6 @@
 import L from "leaflet";
 import { useEffect } from "react";
-import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
+import { CircleMarker, GeoJSON, LayerGroup, LayersControl, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 import type { HeatPoint } from "../services/api";
 
 type MapPanelProps = {
@@ -43,40 +43,55 @@ export function MapPanel({ reportsGeoJson, zonesGeoJson, heatmap }: MapPanelProp
           <p>Reportes georreferenciados, zonas y calor operativo</p>
         </div>
       </header>
-      <MapContainer className="gis-map" center={[-12.0464, -77.0428]} zoom={12} scrollWheelZoom>
+      <MapContainer className="gis-map" center={[-16.432, -71.525]} zoom={13} scrollWheelZoom>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {zonesGeoJson ? (
-          <GeoJSON
-            key={`zones-${zonesGeoJson.features.length}`}
-            data={zonesGeoJson}
-            style={{ color: "#2563eb", weight: 1, fillColor: "#60a5fa", fillOpacity: 0.12 }}
-          />
-        ) : null}
-        {reportsGeoJson ? (
-          <GeoJSON
-            key={`reports-${reportsGeoJson.features.length}`}
-            data={reportsGeoJson}
-            pointToLayer={reportPoint}
-            onEachFeature={(feature, layer) => {
-              const props = feature.properties ?? {};
-              layer.bindPopup(`<strong>${props.categoria ?? "Reporte"}</strong><br/>Estado: ${props.estado ?? "-"}`);
-            }}
-          />
-        ) : null}
-        {heatmap.map((point) => (
-          <CircleMarker
-            key={`${point.latitud}-${point.longitud}-${point.intensidad}`}
-            center={[point.latitud, point.longitud]}
-            radius={Math.max(6, Math.min(24, point.intensidad * 4))}
-            pathOptions={{ color: "#f97316", fillColor: "#f97316", fillOpacity: 0.28, weight: 1 }}
-          >
-            <Popup>Intensidad: {point.intensidad}</Popup>
-          </CircleMarker>
-        ))}
-        <FitToData data={reportsGeoJson} />
+        <LayersControl position="topright">
+          {zonesGeoJson ? (
+            <LayersControl.Overlay checked name="Zonas analiticas">
+              <GeoJSON
+                key={`zones-${zonesGeoJson.features.length}`}
+                data={zonesGeoJson}
+                style={{ color: "#2563eb", weight: 1.5, fillColor: "#60a5fa", fillOpacity: 0.12 }}
+                onEachFeature={(feature, layer) => {
+                  layer.bindPopup(`<strong>${feature.properties?.nombre ?? "Zona"}</strong>`);
+                }}
+              />
+            </LayersControl.Overlay>
+          ) : null}
+          {reportsGeoJson ? (
+            <LayersControl.Overlay checked name="Reportes">
+              <GeoJSON
+                key={`reports-${reportsGeoJson.features.length}`}
+                data={reportsGeoJson}
+                pointToLayer={reportPoint}
+                onEachFeature={(feature, layer) => {
+                  const props = feature.properties ?? {};
+                  layer.bindPopup(
+                    `<strong>${props.categoria ?? "Reporte"}</strong><br/>Estado: ${props.estado ?? "-"}<br/>Zona: ${props.zona ?? "Sin zona"}`
+                  );
+                }}
+              />
+            </LayersControl.Overlay>
+          ) : null}
+          <LayersControl.Overlay checked name="Concentracion">
+            <LayerGroup>
+              {heatmap.map((point) => (
+                <CircleMarker
+                  key={`${point.latitud}-${point.longitud}-${point.intensidad}`}
+                  center={[point.latitud, point.longitud]}
+                  radius={Math.max(6, Math.min(24, point.intensidad * 4))}
+                  pathOptions={{ color: "#f97316", fillColor: "#f97316", fillOpacity: 0.28, weight: 1 }}
+                >
+                  <Popup>Intensidad: {point.intensidad}</Popup>
+                </CircleMarker>
+              ))}
+            </LayerGroup>
+          </LayersControl.Overlay>
+        </LayersControl>
+        <FitToData data={zonesGeoJson?.features.length ? zonesGeoJson : reportsGeoJson} />
       </MapContainer>
     </section>
   );

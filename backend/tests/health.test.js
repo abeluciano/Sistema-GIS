@@ -21,5 +21,7 @@ describe("health routes", () => {
 
     expect(response.body.openapi).toBe("3.0.3");
     expect(response.body.paths["/health"]).toBeDefined();
+    expect(response.body.paths["/zonas/reasignar"]).toBeDefined();
+    expect(response.body.paths["/reportes/{id}/fotos/{fotoId}/archivo"]).toBeDefined();
   });
 });

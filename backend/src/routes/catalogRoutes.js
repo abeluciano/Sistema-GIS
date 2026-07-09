@@ -61,7 +61,8 @@ catalogRoutes.patch("/categorias/:id/estado", authenticateAdmin, requireRole("ge
 
 catalogRoutes.get("/zonas", asyncHandler(async (_req, res) => {
   const result = await query(`
-    select id, nombre, descripcion, activo, created_at, updated_at, st_asgeojson(geom)::json as geojson
+    select id, nombre, descripcion, tipo, fuente, referencia, activo, created_at, updated_at,
+           st_asgeojson(geom)::json as geojson
     from zonas
     order by nombre asc
   `);
@@ -104,4 +105,35 @@ catalogRoutes.patch("/zonas/:id/estado", authenticateAdmin, requireRole("gestor"
   );
   if (!result.rows[0]) throw new HttpError(404, "Zona no encontrada.");
   res.json({ data: result.rows[0] });
+}));
+
+catalogRoutes.post("/zonas/reasignar", authenticateAdmin, requireRole("gestor", "administrador"), asyncHandler(async (_req, res) => {
+  const result = await query(`
+    with asignaciones as (
+      select r.id as reporte_id, coincidencia.id as zona_id
+      from reportes r
+      cross join lateral (
+        select z.id
+        from zonas z
+        where z.activo
+          and z.geom is not null
+          and st_covers(z.geom, r.ubicacion)
+        order by st_area(z.geom::geography) asc, z.id asc
+        limit 1
+      ) coincidencia
+    )
+    update reportes r
+    set zona_id = a.zona_id,
+        updated_at = now()
+    from asignaciones a
+    where r.id = a.reporte_id
+      and r.zona_id is distinct from a.zona_id
+    returning r.id
+  `);
+  res.json({
+    data: {
+      actualizados: result.rowCount,
+      message: `${result.rowCount} reportes fueron asignados espacialmente.`
+    }
+  });
 }));

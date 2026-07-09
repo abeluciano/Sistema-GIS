@@ -24,6 +24,8 @@ gisRoutes.get("/gis/reportes.geojson", asyncHandler(async (req, res) => {
           'id', r.id,
           'categoria_id', r.categoria_id,
           'categoria', c.nombre,
+          'zona_id', r.zona_id,
+          'zona', z.nombre,
           'urgencia', r.urgencia,
           'estado', r.estado,
           'created_at', r.created_at
@@ -32,6 +34,7 @@ gisRoutes.get("/gis/reportes.geojson", asyncHandler(async (req, res) => {
     ) as geojson
     from reportes r
     left join categorias c on c.id = r.categoria_id
+    left join zonas z on z.id = r.zona_id
     ${where}
   `, values);
 

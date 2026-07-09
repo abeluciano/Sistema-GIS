@@ -10,6 +10,7 @@
     "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js --runInBand",
     "db:check": "node scripts/db-check.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
+    "db:verify:spatial": "node scripts/verify-spatial.mjs",
     "db:seed:admin": "node scripts/seed-admin.mjs",
     "uploads:cleanup": "node scripts/cleanup-uploads.mjs"
   },

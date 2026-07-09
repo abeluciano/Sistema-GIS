@@ -145,6 +145,9 @@ export const openApiDocument = {
     "/zonas/{id}": {
       put: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Actualiza zona." }
     },
+    "/zonas/reasignar": {
+      post: { tags: ["Catalogos"], security: [{ AdminBearer: [] }], summary: "Recalcula la zona de todos los reportes mediante PostGIS." }
+    },
     "/reportes": {
       get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Lista reportes con filtros." },
       post: { tags: ["Reportes"], security: [{ FirebaseBearer: [] }], summary: "Crea reporte ciudadano georreferenciado." }

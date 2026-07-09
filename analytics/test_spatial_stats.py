@@ -1,6 +1,6 @@
 import unittest
 
-from spatial_stats import build_inputs, moran_global, moran_local
+from spatial_stats import build_inputs, getis_ord, moran_global, moran_local
 
 
 def clustered_units():
@@ -44,6 +44,12 @@ class SpatialStatsTests(unittest.TestCase):
             unit["value"] = 1
         with self.assertRaisesRegex(ValueError, "variacion"):
             build_inputs({"units": units})
+
+    def test_getis_ord_returns_bounded_adjusted_probabilities(self):
+        units, values, weights = build_inputs({"units": clustered_units()})
+        result = getis_ord(units, values, weights, 99)
+        self.assertEqual(len(result["data"]), 9)
+        self.assertTrue(all(0 <= row["pAdjusted"] <= 1 for row in result["data"]))
 
 
 if __name__ == "__main__":

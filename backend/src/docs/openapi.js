@@ -243,6 +243,9 @@ export const openApiDocument = {
     "/analisis/espacial/moran-local.geojson": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Moran local en GeoJSON con correccion FDR." }
     },
+    "/analisis/espacial/getis-ord.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Getis-Ord Gi* en GeoJSON con correccion FDR." }
+    },
     "/export/reportes.csv": {
       get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta reportes en CSV." }
     },

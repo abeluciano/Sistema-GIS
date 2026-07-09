@@ -28,5 +28,6 @@ describe("health routes", () => {
     expect(response.body.paths["/indicadores/comparacion-periodos"]).toBeDefined();
     expect(response.body.paths["/analisis/espacial/moran"]).toBeDefined();
     expect(response.body.paths["/analisis/espacial/moran-local.geojson"]).toBeDefined();
+    expect(response.body.paths["/analisis/espacial/getis-ord.geojson"]).toBeDefined();
   });
 });

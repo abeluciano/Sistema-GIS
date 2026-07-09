@@ -14,6 +14,7 @@ import numpy as np
 from esda import Moran, Moran_Local
 from esda.getisord import G_Local
 from libpysal.weights import W
+from libpysal.weights.util import fill_diagonal
 
 
 def finite(value: Any) -> float | None:
@@ -137,18 +138,21 @@ def moran_local(units: list[dict[str, Any]], values: np.ndarray, weights: W, per
 
 
 def getis_ord(units: list[dict[str, Any]], values: np.ndarray, weights: W, permutations: int) -> dict[str, Any]:
+    star_weights = fill_diagonal(weights, 1.0)
+    star_weights.transform = "r"
     result = G_Local(
         values,
-        weights,
+        star_weights,
         transform="R",
         permutations=permutations,
-        star=True,
+        star=None,
         seed=42,
         n_jobs=1,
         keep_simulations=True,
         alternative="two-sided",
     )
-    adjusted = fdr_bh(np.asarray(result.p_sim, dtype=float))
+    p_values = np.minimum(np.asarray(result.p_sim, dtype=float), 1.0)
+    adjusted = fdr_bh(p_values)
     rows = []
     for index, unit in enumerate(units):
         z_score = float(result.Zs[index])
@@ -163,7 +167,7 @@ def getis_ord(units: list[dict[str, Any]], values: np.ndarray, weights: W, permu
                 "value": float(values[index]),
                 "giStar": finite(result.Gs[index]),
                 "zScore": finite(z_score),
-                "pValue": finite(result.p_sim[index]),
+                "pValue": finite(p_values[index]),
                 "pAdjusted": finite(adjusted[index]),
                 "significant": significant,
                 "classification": classification,
@@ -173,7 +177,7 @@ def getis_ord(units: list[dict[str, Any]], values: np.ndarray, weights: W, permu
     return {
         "canRun": True,
         "test": "Getis-Ord Gi*",
-        "method": "PySAL esda.G_Local, star=True",
+        "method": "PySAL esda.G_Local con diagonal explicita",
         "sampleSize": len(units),
         "permutations": permutations,
         "multipleTesting": "Benjamini-Hochberg FDR 0.05",

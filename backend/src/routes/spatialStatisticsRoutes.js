@@ -33,3 +33,11 @@ spatialStatisticsRoutes.get("/analisis/espacial/moran-local.geojson", validate(s
   });
   res.status(analysis.canRun ? 200 : 422).json(geojson);
 }));
+
+spatialStatisticsRoutes.get("/analisis/espacial/getis-ord.geojson", validate(spatialQuery), asyncHandler(async (req, res) => {
+  const { analysis, units } = await runSpatialAnalysis("getis_ord", req.validatedQuery);
+  const geojson = localAnalysisGeoJson(analysis, units, {
+    tamanio_m: req.validatedQuery.tamanio
+  });
+  res.status(analysis.canRun ? 200 : 422).json(geojson);
+}));

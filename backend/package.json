@@ -11,6 +11,7 @@
     "db:check": "node scripts/db-check.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:verify:spatial": "node scripts/verify-spatial.mjs",
+    "db:import:sectors": "node scripts/import-municipal-sectors.mjs",
     "db:seed:admin": "node scripts/seed-admin.mjs",
     "uploads:cleanup": "node scripts/cleanup-uploads.mjs"
   },

@@ -83,7 +83,7 @@ indicatorRoutes.get("/indicadores/por-zona", validate(indicatorFilters), asyncHa
     select z.id, z.nombre, count(*)::int as total
     from reportes r
     join zonas z on z.id = r.zona_id
-    where ${filterSql}
+    where z.activo = true and ${filterSql}
     group by z.id, z.nombre
     order by total desc, z.nombre asc
   `, filterValues(req));

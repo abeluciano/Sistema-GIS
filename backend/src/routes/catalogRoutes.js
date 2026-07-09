@@ -64,6 +64,7 @@ catalogRoutes.get("/zonas", asyncHandler(async (_req, res) => {
     select id, nombre, descripcion, tipo, fuente, referencia, activo, created_at, updated_at,
            st_asgeojson(geom)::json as geojson
     from zonas
+    where activo = true
     order by nombre asc
   `);
   res.json({ data: result.rows });

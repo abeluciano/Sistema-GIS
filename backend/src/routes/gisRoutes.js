@@ -73,7 +73,7 @@ gisRoutes.get("/gis/zonas.geojson", asyncHandler(async (_req, res) => {
       )), '[]'::jsonb)
     ) as geojson
     from zonas z
-    where z.geom is not null
+    where z.activo = true and z.geom is not null
   `);
 
   res.json(result.rows[0].geojson);

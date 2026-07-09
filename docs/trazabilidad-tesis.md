@@ -43,9 +43,15 @@ La validacion del esquema toma como referencia el modelo de datos de la tesis y 
 ## Cierre tecnico
 
 - Fase 15: evidencia fotografica completa entre movil, API y dashboard.
-- Fase 16: limite distrital, zonas analiticas, indice GiST y asignacion automatica.
+- Fase 16: limite distrital, zonas analiticas iniciales, indice GiST y asignacion automatica.
 - Fase 17: mapa de calor y hotspots/coldspots exploratorios.
 - Fase 18: filtros consistentes, indicadores y analisis estadistico orientado al gestor.
+- Fase 19: sectores municipales A-G digitalizados desde fuente municipal referencial y asignacion espacial.
+- Fase 20: comparaciones temporales y exportacion CSV.
+- Fase 21: unidades espaciales de 250 y 500 metros con vecindad Queen.
+- Fase 22: Moran's I global y local mediante PySAL.
+- Fase 23: Getis-Ord Gi* mediante PySAL y correccion FDR.
+- Fase 24: integracion del analisis espacial en dashboard y capas Leaflet.
 
 Los objetivos tecnicos del prototipo se consideran cumplidos con las limitaciones
-y trabajos futuros declarados en `docs/reportes/fase-18.md`.
+y trabajos futuros declarados en `docs/reportes/fase-25.md`.

@@ -92,7 +92,7 @@ se realizan inferencias causales.
 | Filtros por categoria, fecha, estado y zona | Cumplido |
 | Indicadores visuales para decisiones | Cumplido |
 | Analisis estadistico solo para gestores | Cumplido |
-| Moran's I y Getis-Ord Gi* | Preparacion conceptual; no afirmados como ejecutados |
+| Moran's I y Getis-Ord Gi* | Cumplido en fases 22 a 24 mediante PySAL, GeoJSON y capas del dashboard |
 
 ## Limitaciones
 
@@ -101,5 +101,14 @@ se realizan inferencias causales.
 - La sectorizacion municipal A-G se encontro en un mapa raster del plan de
   contingencia por sismos; requiere datos vectoriales oficiales o digitalizacion
   catastral validada antes de reemplazar las zonas analiticas.
-- Moran's I y Getis-Ord Gi* requieren mas unidades espaciales y observaciones para
-  una aplicacion e interpretacion responsable.
+- Moran's I local y Getis-Ord Gi* requieren mayor volumen de observaciones para
+  obtener mayor potencia estadistica local; aun asi, la estructura y ejecucion
+  tecnica quedaron implementadas en fases posteriores.
+
+## Actualizacion posterior
+
+Las fases 19 a 24 completaron la sectorizacion A-G, las comparaciones
+temporales, las unidades espaciales de analisis, Moran's I global/local,
+Getis-Ord Gi* y su visualizacion en el dashboard. Esta fase queda como cierre de
+indicadores y estadistica general; el cierre integral actualizado esta en
+`docs/reportes/fase-25.md`.

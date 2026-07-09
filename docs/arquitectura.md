@@ -13,12 +13,12 @@ La app movil se enfoca en ciudadanos reportadores. El dashboard queda reservado 
 - App movil: Ionic + React + Capacitor, Firebase Auth con Google Sign-In, GPS, camara, reportes y emergencia.
 - Dashboard: React + Leaflet, mapa, filtros, reportes, indicadores y analisis estadistico exploratorio para gestores.
 - Backend: Express, autenticacion Firebase, autenticacion administrativa, roles, validacion de datos, storage local, GIS, indicadores y documentacion OpenAPI/Scalar.
-- Base de datos: Neon PostgreSQL + PostGIS con geometria `POINT` para reportes y `POLYGON` para zonas, ambas en SRID 4326.
+- Base de datos: Neon PostgreSQL + PostGIS con geometria `POINT` para reportes, `MULTIPOLYGON` para zonas y unidades espaciales de analisis, todas en SRID 4326.
 
 ## Alcance GIS y estadistico
 
-El analisis GIS incluye visualizacion georreferenciada, GeoJSON, filtros, mapas de calor, hotspots, coldspots, analisis espacial exploratorio, Moran's I y Getis-Ord Gi* segun viabilidad.
+El analisis GIS incluye visualizacion georreferenciada, GeoJSON, filtros, mapas de calor, hotspots, coldspots, agregacion espacial por cuadricula, Moran's I global y local, y Getis-Ord Gi* con correccion FDR.
 
 El analisis estadistico exploratorio sera exclusivo del dashboard administrativo. La interfaz debe presentar preguntas comprensibles para gestores, y el backend seleccionara o validara internamente la prueba estadistica pertinente.
 
-El MVP inicia con visualizacion GeoJSON, filtros, agregaciones espaciales e indicadores basicos, dejando preparada la estructura para incorporar progresivamente mapas de calor, Moran's I y Getis-Ord Gi*, sin que el sistema se enfoque en modelos predictivos.
+El MVP inicia con visualizacion GeoJSON, filtros, agregaciones espaciales e indicadores basicos. La implementacion actual incorpora progresivamente mapas de calor, Moran's I y Getis-Ord Gi*, sin que el sistema se enfoque en modelos predictivos.

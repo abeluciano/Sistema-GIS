@@ -1,6 +1,6 @@
 import { Download, Play, Sigma } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { AnalysisRequest, StatisticalResult } from "../services/api";
+import type { AnalysisRequest, Category, StatisticalResult, Zone } from "../services/api";
 
 type AnalysisOption = {
   id: string;
@@ -16,11 +16,26 @@ type AnalysisFormState = {
   grupoA: string;
   grupoB: string;
   groupBy: "zona" | "categoria";
+  zonaId: string;
+  categoriaId: string;
+  estado: string;
 };
 
 type StatisticalAnalysisPanelProps = {
+  categories: Category[];
+  zones: Zone[];
   runAnalysis: (request: AnalysisRequest) => Promise<StatisticalResult>;
 };
+
+function commonFilters(state: AnalysisFormState) {
+  return {
+    fecha_inicio: state.fechaInicio,
+    fecha_fin: state.fechaFin,
+    zona_id: state.zonaId,
+    categoria_id: state.categoriaId,
+    estado: state.estado
+  };
+}
 
 const options: AnalysisOption[] = [
   {
@@ -28,7 +43,7 @@ const options: AnalysisOption[] = [
     label: "Asociacion entre categoria del incidente y zona",
     request: (state) => ({
       endpoint: "/analisis/estadistico/chi-cuadrado",
-      params: { variableA: "categoria", variableB: "zona", fecha_inicio: state.fechaInicio, fecha_fin: state.fechaFin }
+      params: { ...commonFilters(state), variableA: "categoria", variableB: "zona" }
     })
   },
   {
@@ -36,7 +51,7 @@ const options: AnalysisOption[] = [
     label: "Asociacion entre estado del reporte y categoria",
     request: (state) => ({
       endpoint: "/analisis/estadistico/chi-cuadrado",
-      params: { variableA: "estado", variableB: "categoria", fecha_inicio: state.fechaInicio, fecha_fin: state.fechaFin }
+      params: { ...commonFilters(state), variableA: "estado", variableB: "categoria" }
     })
   },
   {
@@ -44,7 +59,7 @@ const options: AnalysisOption[] = [
     label: "Asociacion entre urgencia y zona",
     request: (state) => ({
       endpoint: "/analisis/estadistico/chi-cuadrado",
-      params: { variableA: "urgencia", variableB: "zona", fecha_inicio: state.fechaInicio, fecha_fin: state.fechaFin }
+      params: { ...commonFilters(state), variableA: "urgencia", variableB: "zona" }
     })
   },
   {
@@ -53,7 +68,7 @@ const options: AnalysisOption[] = [
     needsGroups: "two-zones",
     request: (state) => ({
       endpoint: "/analisis/estadistico/mann-whitney",
-      params: { groupBy: "zona", metric: "tiempo_atencion_horas", groups: [state.grupoA, state.grupoB].filter(Boolean).join(",") }
+      params: { ...commonFilters(state), groupBy: "zona", metric: "tiempo_atencion_horas", groups: [state.grupoA, state.grupoB].filter(Boolean).join(",") }
     })
   },
   {
@@ -62,7 +77,7 @@ const options: AnalysisOption[] = [
     needsGroups: "two-categories",
     request: (state) => ({
       endpoint: "/analisis/estadistico/mann-whitney",
-      params: { groupBy: "categoria", metric: "tiempo_atencion_horas", groups: [state.grupoA, state.grupoB].filter(Boolean).join(",") }
+      params: { ...commonFilters(state), groupBy: "categoria", metric: "tiempo_atencion_horas", groups: [state.grupoA, state.grupoB].filter(Boolean).join(",") }
     })
   },
   {
@@ -71,23 +86,23 @@ const options: AnalysisOption[] = [
     needsGroupBy: true,
     request: (state) => ({
       endpoint: "/analisis/estadistico/kruskal-wallis",
-      params: { groupBy: state.groupBy }
+      params: { ...commonFilters(state), groupBy: state.groupBy }
     })
   },
   {
     id: "urgencia-tiempo",
     label: "Relacion entre urgencia y tiempo de atencion",
-    request: () => ({ endpoint: "/analisis/estadistico/spearman" })
+    request: (state) => ({ endpoint: "/analisis/estadistico/spearman", params: commonFilters(state) })
   },
   {
     id: "antes-despues",
     label: "Comparacion antes-despues por zona o periodo",
-    request: () => ({ endpoint: "/analisis/estadistico/wilcoxon" })
+    request: (state) => ({ endpoint: "/analisis/estadistico/wilcoxon", params: commonFilters(state) })
   },
   {
     id: "evolucion-periodos",
     label: "Evolucion de indicadores en tres o mas periodos",
-    request: () => ({ endpoint: "/analisis/estadistico/friedman" })
+    request: (state) => ({ endpoint: "/analisis/estadistico/friedman", params: commonFilters(state) })
   }
 ];
 
@@ -101,14 +116,17 @@ function csvValue(value: unknown) {
   return String(value).replaceAll('"', '""');
 }
 
-export function StatisticalAnalysisPanel({ runAnalysis }: StatisticalAnalysisPanelProps) {
+export function StatisticalAnalysisPanel({ categories, zones, runAnalysis }: StatisticalAnalysisPanelProps) {
   const [selectedId, setSelectedId] = useState(options[0].id);
   const [formState, setFormState] = useState<AnalysisFormState>({
     fechaInicio: "",
     fechaFin: "",
     grupoA: "",
     grupoB: "",
-    groupBy: "zona"
+    groupBy: "zona",
+    zonaId: "",
+    categoriaId: "",
+    estado: ""
   });
   const [result, setResult] = useState<StatisticalResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -171,15 +189,54 @@ export function StatisticalAnalysisPanel({ runAnalysis }: StatisticalAnalysisPan
           Hasta
           <input type="date" value={formState.fechaFin} onChange={(event) => update("fechaFin", event.target.value)} />
         </label>
+        <label>
+          Zona
+          <select value={formState.zonaId} onChange={(event) => update("zonaId", event.target.value)}>
+            <option value="">Todas</option>
+            {zones.filter((zone) => zone.activo).map((zone) => (
+              <option value={zone.id} key={zone.id}>{zone.nombre}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Categoria
+          <select value={formState.categoriaId} onChange={(event) => update("categoriaId", event.target.value)}>
+            <option value="">Todas</option>
+            {categories.filter((category) => category.activo).map((category) => (
+              <option value={category.id} key={category.id}>{category.nombre.replaceAll("_", " ")}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Estado
+          <select value={formState.estado} onChange={(event) => update("estado", event.target.value)}>
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="validado">Validado</option>
+            <option value="atendido">Atendido</option>
+            <option value="rechazado">Rechazado</option>
+            <option value="archivado">Archivado</option>
+          </select>
+        </label>
         {selectedOption.needsGroups ? (
           <>
             <label>
               {selectedOption.needsGroups === "two-zones" ? "Zona 1" : "Categoria 1"}
-              <input value={formState.grupoA} onChange={(event) => update("grupoA", event.target.value)} />
+              <select value={formState.grupoA} onChange={(event) => update("grupoA", event.target.value)}>
+                <option value="">Seleccionar</option>
+                {(selectedOption.needsGroups === "two-zones" ? zones : categories)
+                  .filter((item) => item.activo)
+                  .map((item) => <option key={item.id} value={item.nombre}>{item.nombre.replaceAll("_", " ")}</option>)}
+              </select>
             </label>
             <label>
               {selectedOption.needsGroups === "two-zones" ? "Zona 2" : "Categoria 2"}
-              <input value={formState.grupoB} onChange={(event) => update("grupoB", event.target.value)} />
+              <select value={formState.grupoB} onChange={(event) => update("grupoB", event.target.value)}>
+                <option value="">Seleccionar</option>
+                {(selectedOption.needsGroups === "two-zones" ? zones : categories)
+                  .filter((item) => item.activo)
+                  .map((item) => <option key={item.id} value={item.nombre}>{item.nombre.replaceAll("_", " ")}</option>)}
+              </select>
             </label>
           </>
         ) : null}

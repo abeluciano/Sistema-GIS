@@ -39,3 +39,13 @@ La validacion del esquema toma como referencia el modelo de datos de la tesis y 
 - App movil ciudadana para reportar, consultar reportes propios y acceder a emergencia.
 - Dashboard administrativo para gestion, mapa, indicadores y analisis estadistico.
 - Seguridad operativa con auditoria local de secretos, rate limiting, request IDs y limpieza de uploads huerfanos en dry-run.
+
+## Cierre tecnico
+
+- Fase 15: evidencia fotografica completa entre movil, API y dashboard.
+- Fase 16: limite distrital, zonas analiticas, indice GiST y asignacion automatica.
+- Fase 17: mapa de calor y hotspots/coldspots exploratorios.
+- Fase 18: filtros consistentes, indicadores y analisis estadistico orientado al gestor.
+
+Los objetivos tecnicos del prototipo se consideran cumplidos con las limitaciones
+y trabajos futuros declarados en `docs/reportes/fase-18.md`.

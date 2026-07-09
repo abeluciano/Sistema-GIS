@@ -13,7 +13,7 @@ describe("StatisticalAnalysisPanel", () => {
       interpretation: "Existe evidencia estadistica de asociacion."
     });
 
-    render(<StatisticalAnalysisPanel runAnalysis={runAnalysis} />);
+    render(<StatisticalAnalysisPanel categories={[]} zones={[]} runAnalysis={runAnalysis} />);
 
     expect(screen.getByText("Asociacion entre categoria del incidente y zona")).toBeInTheDocument();
     expect(screen.queryByText("Chi-cuadrado")).not.toBeInTheDocument();
@@ -26,7 +26,10 @@ describe("StatisticalAnalysisPanel", () => {
         variableA: "categoria",
         variableB: "zona",
         fecha_inicio: "",
-        fecha_fin: ""
+        fecha_fin: "",
+        zona_id: "",
+        categoria_id: "",
+        estado: ""
       }
     }));
     expect(await screen.findByText(/Prueba utilizada: Chi-cuadrado/i)).toBeInTheDocument();

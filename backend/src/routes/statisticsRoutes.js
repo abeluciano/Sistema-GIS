@@ -23,7 +23,7 @@ const categoricalVariables = {
   urgencia: "r.urgencia"
 };
 
-function dateFilter(req, values) {
+function reportFilters(req, values) {
   const filters = [];
   if (req.query.fecha_inicio) {
     values.push(req.query.fecha_inicio);
@@ -32,6 +32,18 @@ function dateFilter(req, values) {
   if (req.query.fecha_fin) {
     values.push(req.query.fecha_fin);
     filters.push(`r.created_at::date <= $${values.length}::date`);
+  }
+  if (req.query.zona_id) {
+    values.push(req.query.zona_id);
+    filters.push(`r.zona_id = $${values.length}::int`);
+  }
+  if (req.query.categoria_id) {
+    values.push(req.query.categoria_id);
+    filters.push(`r.categoria_id = $${values.length}::int`);
+  }
+  if (req.query.estado) {
+    values.push(req.query.estado);
+    filters.push(`r.estado = $${values.length}::varchar`);
   }
   return filters;
 }
@@ -44,7 +56,7 @@ statisticsRoutes.get("/analisis/estadistico/chi-cuadrado", asyncHandler(async (r
   if (!columnA || !columnB || variableA === variableB) throw new HttpError(400, "Variables categoricas no validas.");
 
   const values = [];
-  const filters = dateFilter(req, values);
+  const filters = reportFilters(req, values);
   const where = filters.length > 0 ? `where ${filters.join(" and ")}` : "";
   const result = await query(`
     select ${columnA} as variable_a, ${columnB} as variable_b, count(*)::int as total
@@ -69,6 +81,9 @@ statisticsRoutes.get("/analisis/estadistico/mann-whitney", asyncHandler(async (r
   }
 
   const labelColumn = groupBy === "zona" ? "coalesce(z.nombre, 'Sin zona')" : "c.nombre";
+  const values = [groups];
+  const filters = reportFilters(req, values);
+  const extraFilters = filters.length > 0 ? `and ${filters.join(" and ")}` : "";
   const result = await query(`
     select ${labelColumn} as label,
            extract(epoch from (coalesce(r.validado_at, r.updated_at) - r.created_at)) / 3600 as value
@@ -78,7 +93,8 @@ statisticsRoutes.get("/analisis/estadistico/mann-whitney", asyncHandler(async (r
     where r.estado in ('validado', 'atendido', 'archivado')
       and ${labelColumn} = any($1)
       and coalesce(r.validado_at, r.updated_at) is not null
-  `, [groups]);
+      ${extraFilters}
+  `, values);
 
   const grouped = groups.map((label) => ({
     label,
@@ -94,6 +110,9 @@ statisticsRoutes.get("/analisis/estadistico/kruskal-wallis", asyncHandler(async 
   if (!["zona", "categoria"].includes(groupBy)) throw new HttpError(400, "Agrupacion no valida.");
 
   const labelColumn = groupBy === "zona" ? "coalesce(z.nombre, 'Sin zona')" : "c.nombre";
+  const values = [];
+  const filters = reportFilters(req, values);
+  const extraFilters = filters.length > 0 ? `and ${filters.join(" and ")}` : "";
   const result = await query(`
     select ${labelColumn} as label,
            extract(epoch from (coalesce(r.validado_at, r.updated_at) - r.created_at)) / 3600 as value
@@ -102,7 +121,8 @@ statisticsRoutes.get("/analisis/estadistico/kruskal-wallis", asyncHandler(async 
     left join zonas z on z.id = r.zona_id
     where r.estado in ('validado', 'atendido', 'archivado')
       and coalesce(r.validado_at, r.updated_at) is not null
-  `);
+      ${extraFilters}
+  `, values);
 
   const labels = [...new Set(result.rows.map((row) => row.label))];
   const grouped = labels.map((label) => ({
@@ -114,14 +134,18 @@ statisticsRoutes.get("/analisis/estadistico/kruskal-wallis", asyncHandler(async 
   res.json({ analysis: "Comparacion entre tres o mas grupos independientes", ...analysis });
 }));
 
-statisticsRoutes.get("/analisis/estadistico/spearman", asyncHandler(async (_req, res) => {
+statisticsRoutes.get("/analisis/estadistico/spearman", asyncHandler(async (req, res) => {
+  const values = [];
+  const filters = reportFilters(req, values);
+  const extraFilters = filters.length > 0 ? `and ${filters.join(" and ")}` : "";
   const result = await query(`
     select r.urgencia,
            extract(epoch from (coalesce(r.validado_at, r.updated_at) - r.created_at)) / 3600 as tiempo_atencion_horas
     from reportes r
     where r.estado in ('validado', 'atendido', 'archivado')
       and coalesce(r.validado_at, r.updated_at) is not null
-  `);
+      ${extraFilters}
+  `, values);
 
   const pairs = result.rows
     .map((row) => ({ x: mapUrgency(row.urgencia), y: Number(row.tiempo_atencion_horas) }))

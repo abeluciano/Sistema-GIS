@@ -208,20 +208,32 @@ export async function getZones() {
   return request<{ data: Zone[] }>("/zonas");
 }
 
-export async function getSummary(token: string) {
-  return request<{ data: Summary }>("/indicadores/resumen", { headers: authHeaders(token) });
+export async function getSummary(token: string, filters: ReportFilters) {
+  return request<{ data: Summary }>(
+    `/indicadores/resumen${buildQuery({ ...filters })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
-export async function getByCategory(token: string) {
-  return request<{ data: CountPoint[] }>("/indicadores/por-categoria", { headers: authHeaders(token) });
+export async function getByCategory(token: string, filters: ReportFilters) {
+  return request<{ data: CountPoint[] }>(
+    `/indicadores/por-categoria${buildQuery({ ...filters })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
-export async function getByZone(token: string) {
-  return request<{ data: CountPoint[] }>("/indicadores/por-zona", { headers: authHeaders(token) });
+export async function getByZone(token: string, filters: ReportFilters) {
+  return request<{ data: CountPoint[] }>(
+    `/indicadores/por-zona${buildQuery({ ...filters })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
-export async function getByPeriod(token: string) {
-  return request<{ data: PeriodPoint[] }>("/indicadores/por-periodo?periodo=dia", { headers: authHeaders(token) });
+export async function getByPeriod(token: string, filters: ReportFilters) {
+  return request<{ data: PeriodPoint[] }>(
+    `/indicadores/por-periodo${buildQuery({ ...filters, periodo: "dia" })}`,
+    { headers: authHeaders(token) }
+  );
 }
 
 export async function getReportGeoJson(token: string, filters: ReportFilters) {

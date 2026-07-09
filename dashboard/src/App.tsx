@@ -93,10 +93,10 @@ export default function App() {
         getReports(token, filters, page, pageSize),
         getCategories(),
         getZones(),
-        getSummary(token),
-        getByCategory(token),
-        getByZone(token),
-        getByPeriod(token),
+        getSummary(token, filters),
+        getByCategory(token, filters),
+        getByZone(token, filters),
+        getByPeriod(token, filters),
         getReportGeoJson(token, filters),
         getZonesGeoJson(token),
         getHeatmap(token, filters),
@@ -275,7 +275,11 @@ export default function App() {
         </section>
 
         <section id="estadistica" className="workspace-section">
-          <StatisticalAnalysisPanel runAnalysis={(request) => runStatisticalAnalysis(token, request)} />
+          <StatisticalAnalysisPanel
+            categories={categories}
+            zones={zones}
+            runAnalysis={(request) => runStatisticalAnalysis(token, request)}
+          />
         </section>
       </section>
     </main>

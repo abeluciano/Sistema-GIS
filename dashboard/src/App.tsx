@@ -7,7 +7,9 @@ import { LoginPanel } from "./components/LoginPanel";
 import { MapPanel } from "./components/MapPanel";
 import { ReportsTable } from "./components/ReportsTable";
 import { StatisticalAnalysisPanel } from "./components/StatisticalAnalysisPanel";
+import { TemporalComparisonPanel } from "./components/TemporalComparisonPanel";
 import {
+  buildPeriodComparisonCsvUrl,
   buildReportsCsvUrl,
   changeReportState,
   deleteReportPhoto,
@@ -17,6 +19,7 @@ import {
   getCategories,
   getHeatmap,
   getMe,
+  getPeriodComparison,
   getReportGeoJson,
   getReportPhotoBlob,
   getReportPhotos,
@@ -32,6 +35,7 @@ import {
   type CountPoint,
   type EstadoReporte,
   type HeatPoint,
+  type PeriodComparisonConfig,
   type PeriodPoint,
   type Report,
   type ReportFilters,
@@ -202,6 +206,21 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  async function downloadComparisonCsv(config: PeriodComparisonConfig) {
+    if (!token) return;
+    const response = await fetch(buildPeriodComparisonCsvUrl(config, filters), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("No se pudo exportar la comparacion.");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "comparacion-periodos.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (!token) return <LoginPanel onLogin={handleLogin} />;
 
   return (
@@ -272,6 +291,10 @@ export default function App() {
 
         <section id="indicadores" className="workspace-section">
           <ChartsPanel byCategory={byCategory} byZone={byZone} byPeriod={byPeriod} />
+          <TemporalComparisonPanel
+            runComparison={async (config) => (await getPeriodComparison(token, config, filters)).data}
+            exportComparison={downloadComparisonCsv}
+          />
         </section>
 
         <section id="estadistica" className="workspace-section">

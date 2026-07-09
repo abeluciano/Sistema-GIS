@@ -198,6 +198,9 @@ export const openApiDocument = {
     "/indicadores/por-periodo": {
       get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "Conteo de reportes por dia o mes." }
     },
+    "/indicadores/comparacion-periodos": {
+      get: { tags: ["Indicadores"], security: [{ AdminBearer: [] }], summary: "Compara dos periodos por zona, categoria o estado." }
+    },
     "/gis/reportes.geojson": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Reportes en GeoJSON." }
     },
@@ -233,6 +236,9 @@ export const openApiDocument = {
     },
     "/export/reportes.csv": {
       get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta reportes en CSV." }
+    },
+    "/export/comparacion-periodos.csv": {
+      get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta una comparacion temporal en CSV." }
     }
   }
 };

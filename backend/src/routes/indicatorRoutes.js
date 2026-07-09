@@ -5,6 +5,7 @@ import { authenticateAdmin } from "../middlewares/authAdmin.js";
 import { requireRole } from "../middlewares/requireRole.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { validate } from "../middlewares/validate.js";
+import { comparePeriods } from "../services/indicatorComparisonService.js";
 
 export const indicatorRoutes = Router();
 
@@ -17,6 +18,20 @@ const indicatorFilters = z.object({
     fecha_inicio: z.iso.date().optional(),
     fecha_fin: z.iso.date().optional(),
     periodo: z.enum(["dia", "mes"]).optional()
+  })
+});
+
+export const comparisonFilters = z.object({
+  query: z.object({
+    periodo_a_inicio: z.iso.date(),
+    periodo_a_fin: z.iso.date(),
+    periodo_b_inicio: z.iso.date(),
+    periodo_b_fin: z.iso.date(),
+    agrupar: z.enum(["zona", "categoria", "estado"]).optional(),
+    categoria_id: z.coerce.number().int().positive().optional(),
+    zona_id: z.coerce.number().int().positive().optional(),
+    estado: z.enum(["pendiente", "validado", "rechazado", "atendido", "archivado"]).optional(),
+    urgencia: z.enum(["baja", "media", "alta", "critica"]).optional()
   })
 });
 
@@ -100,4 +115,8 @@ indicatorRoutes.get("/indicadores/por-periodo", validate(indicatorFilters), asyn
     order by periodo asc
   `, [period, ...filterValues(req)]);
   res.json({ data: result.rows });
+}));
+
+indicatorRoutes.get("/indicadores/comparacion-periodos", validate(comparisonFilters), asyncHandler(async (req, res) => {
+  res.json({ data: await comparePeriods(req.query) });
 }));

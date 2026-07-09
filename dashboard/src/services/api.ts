@@ -87,6 +87,39 @@ export type PeriodPoint = {
   total: number;
 };
 
+export type PeriodComparisonConfig = {
+  periodo_a_inicio: string;
+  periodo_a_fin: string;
+  periodo_b_inicio: string;
+  periodo_b_fin: string;
+  agrupar: "zona" | "categoria" | "estado";
+};
+
+export type PeriodComparisonRow = {
+  nombre: string;
+  periodo_a: number;
+  periodo_b: number;
+  diferencia: number;
+  variacion_porcentual: number | null;
+};
+
+export type PeriodComparisonResult = {
+  periodos: {
+    a: { inicio: string; fin: string };
+    b: { inicio: string; fin: string };
+  };
+  agrupacion: string;
+  resumen: {
+    periodo_a: number;
+    periodo_b: number;
+    diferencia: number;
+    variacion_porcentual: number | null;
+  };
+  data: PeriodComparisonRow[];
+  interpretation: string;
+  warning: string;
+};
+
 export type HeatPoint = {
   latitud: number;
   longitud: number;
@@ -236,6 +269,27 @@ export async function getByPeriod(token: string, filters: ReportFilters) {
   );
 }
 
+function comparisonQuery(config: PeriodComparisonConfig, filters: ReportFilters) {
+  return {
+    ...config,
+    categoria_id: filters.categoria_id,
+    zona_id: filters.zona_id,
+    estado: filters.estado,
+    urgencia: filters.urgencia
+  };
+}
+
+export async function getPeriodComparison(
+  token: string,
+  config: PeriodComparisonConfig,
+  filters: ReportFilters
+) {
+  return request<{ data: PeriodComparisonResult }>(
+    `/indicadores/comparacion-periodos${buildQuery(comparisonQuery(config, filters))}`,
+    { headers: authHeaders(token) }
+  );
+}
+
 export async function getReportGeoJson(token: string, filters: ReportFilters) {
   return request<GeoJSON.FeatureCollection>(
     `/gis/reportes.geojson${buildQuery({ ...filters })}`,
@@ -306,4 +360,8 @@ export async function deleteReportPhoto(token: string, reportId: number, photoId
 
 export function buildReportsCsvUrl(filters: ReportFilters) {
   return `${API_BASE_URL}/export/reportes.csv${buildQuery(filters)}`;
+}
+
+export function buildPeriodComparisonCsvUrl(config: PeriodComparisonConfig, filters: ReportFilters) {
+  return `${API_BASE_URL}/export/comparacion-periodos.csv${buildQuery(comparisonQuery(config, filters))}`;
 }

@@ -1,6 +1,6 @@
 import type { User } from "firebase/auth";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { createReport, getCategories, getMyReports } from "./api";
+import { createReport, getCategories, getMyReports, uploadReportPhoto } from "./api";
 
 const user = {
   getIdToken: vi.fn().mockResolvedValue("firebase-token")
@@ -24,9 +24,17 @@ describe("mobile API service", () => {
   });
 
   test("creates a georeferenced report with Firebase authorization", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-      data: { id: 43, estado: "pendiente" }
-    }), { status: 201 }));
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        data: { id: 43, estado: "pendiente" }
+      }), { status: 201 }))
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: vi.fn().mockResolvedValue(new Blob(["foto"], { type: "image/jpeg" }))
+      })
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        data: { id: 8, reporte_id: 43 }
+      }), { status: 201 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const payload = {
@@ -36,7 +44,8 @@ describe("mobile API service", () => {
       latitud: -16.4,
       longitud: -71.5
     };
-    await createReport(user, payload);
+    const report = await createReport(user, payload);
+    await uploadReportPhoto(user, report.id, { webPath: "blob:captured-photo", format: "jpeg" });
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/reportes"),
@@ -44,6 +53,14 @@ describe("mobile API service", () => {
         method: "POST",
         headers: expect.objectContaining({ Authorization: "Bearer firebase-token" }),
         body: JSON.stringify(payload)
+      })
+    );
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      expect.stringContaining("/reportes/43/fotos"),
+      expect.objectContaining({
+        method: "POST",
+        headers: { Authorization: "Bearer firebase-token" },
+        body: expect.any(FormData)
       })
     );
   });

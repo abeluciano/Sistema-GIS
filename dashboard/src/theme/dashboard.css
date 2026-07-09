@@ -510,6 +510,46 @@ td span {
   grid-column: 1 / -1;
 }
 
+.photo-section {
+  padding: 0 16px 16px;
+}
+
+.photo-section h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.report-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #d8dee6;
+  border-radius: 6px;
+  background: #f3f5f7;
+}
+
+.report-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.report-photo .icon-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border-color: #f3b5b5;
+  color: #a61b1b;
+  background: #ffffff;
+}
+
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

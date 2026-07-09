@@ -1,6 +1,6 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, FileSearch, ShieldCheck, X } from "lucide-react";
-import { useMemo, useState } from "react";
-import type { EstadoReporte, Report, ReportPagination } from "../services/api";
+import { CheckCircle2, ChevronLeft, ChevronRight, FileSearch, ShieldCheck, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { EstadoReporte, Report, ReportPagination, ReportPhotoView } from "../services/api";
 
 type ReportsTableProps = {
   reports: Report[];
@@ -8,6 +8,8 @@ type ReportsTableProps = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onStateChange: (reportId: number, estado: EstadoReporte) => Promise<void>;
+  onLoadPhotos?: (reportId: number) => Promise<ReportPhotoView[]>;
+  onDeletePhoto?: (reportId: number, photoId: number) => Promise<void>;
   actionMessage?: string;
   actionError?: string;
 };
@@ -27,17 +29,26 @@ function pageNumbers(current: number, total: number) {
   return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 }
 
+function revokePhotoUrl(url: string) {
+  if (typeof URL.revokeObjectURL === "function") URL.revokeObjectURL(url);
+}
+
 export function ReportsTable({
   reports,
   pagination,
   onPageChange,
   onPageSizeChange,
   onStateChange,
+  onLoadPhotos,
+  onDeletePhoto,
   actionMessage,
   actionError
 }: ReportsTableProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [processing, setProcessing] = useState("");
+  const [photos, setPhotos] = useState<ReportPhotoView[]>([]);
+  const [photosLoading, setPhotosLoading] = useState(false);
+  const [photosError, setPhotosError] = useState("");
   const pages = useMemo(
     () => pageNumbers(pagination.page, pagination.total_pages),
     [pagination.page, pagination.total_pages]
@@ -45,11 +56,59 @@ export function ReportsTable({
   const firstVisible = pagination.total === 0 ? 0 : ((pagination.page - 1) * pagination.page_size) + 1;
   const lastVisible = Math.min(pagination.total, pagination.page * pagination.page_size);
 
+  useEffect(() => {
+    if (!selectedReport || !onLoadPhotos) {
+      setPhotos([]);
+      return;
+    }
+
+    let active = true;
+    setPhotosLoading(true);
+    setPhotosError("");
+    void onLoadPhotos(selectedReport.id)
+      .then((loaded) => {
+        if (active) setPhotos(loaded);
+        else loaded.forEach((photo) => revokePhotoUrl(photo.url));
+      })
+      .catch((error) => {
+        if (active) setPhotosError(error instanceof Error ? error.message : "No se pudieron cargar las fotografias.");
+      })
+      .finally(() => {
+        if (active) setPhotosLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedReport, onLoadPhotos]);
+
   async function updateState(reportId: number, estado: EstadoReporte) {
     const operation = `${reportId}-${estado}`;
     setProcessing(operation);
     try {
       await onStateChange(reportId, estado);
+    } finally {
+      setProcessing("");
+    }
+  }
+
+  function closeDetail() {
+    photos.forEach((photo) => revokePhotoUrl(photo.url));
+    setPhotos([]);
+    setSelectedReport(null);
+  }
+
+  async function removePhoto(photo: ReportPhotoView) {
+    if (!selectedReport || !onDeletePhoto) return;
+    const operation = `photo-${photo.id}`;
+    setProcessing(operation);
+    setPhotosError("");
+    try {
+      await onDeletePhoto(selectedReport.id, photo.id);
+      revokePhotoUrl(photo.url);
+      setPhotos((current) => current.filter((item) => item.id !== photo.id));
+    } catch (error) {
+      setPhotosError(error instanceof Error ? error.message : "No se pudo eliminar la fotografia.");
     } finally {
       setProcessing("");
     }
@@ -188,7 +247,7 @@ export function ReportsTable({
       </footer>
 
       {selectedReport ? (
-        <div className="modal-backdrop" onMouseDown={() => setSelectedReport(null)}>
+        <div className="modal-backdrop" onMouseDown={closeDetail}>
           <section
             className="report-dialog"
             role="dialog"
@@ -201,7 +260,7 @@ export function ReportsTable({
                 <p>Reporte #{selectedReport.id}</p>
                 <h3 id="report-detail-title">{readable(selectedReport.categoria_nombre)}</h3>
               </div>
-              <button type="button" className="icon-button" onClick={() => setSelectedReport(null)} aria-label="Cerrar detalle">
+              <button type="button" className="icon-button" onClick={closeDetail} aria-label="Cerrar detalle">
                 <X size={18} />
               </button>
             </header>
@@ -223,6 +282,31 @@ export function ReportsTable({
                 </dd>
               </div>
             </dl>
+            <section className="photo-section" aria-label="Evidencia fotografica">
+              <h4>Evidencia fotografica</h4>
+              {photosLoading ? <p>Cargando fotografias...</p> : null}
+              {photosError ? <p className="table-feedback error" role="alert">{photosError}</p> : null}
+              {!photosLoading && !photosError && photos.length === 0 ? <p>Sin fotografias adjuntas.</p> : null}
+              <div className="photo-gallery">
+                {photos.map((photo) => (
+                  <figure className="report-photo" key={photo.id}>
+                    <img src={photo.url} alt={`Evidencia del reporte ${selectedReport.id}`} />
+                    {onDeletePhoto ? (
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => void removePhoto(photo)}
+                        disabled={processing === `photo-${photo.id}`}
+                        aria-label={`Eliminar fotografia ${photo.id}`}
+                        title="Eliminar fotografia"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    ) : null}
+                  </figure>
+                ))}
+              </div>
+            </section>
           </section>
         </div>
       ) : null}

@@ -10,6 +10,7 @@ import { StatisticalAnalysisPanel } from "./components/StatisticalAnalysisPanel"
 import {
   buildReportsCsvUrl,
   changeReportState,
+  deleteReportPhoto,
   getByCategory,
   getByPeriod,
   getByZone,
@@ -17,6 +18,8 @@ import {
   getHeatmap,
   getMe,
   getReportGeoJson,
+  getReportPhotoBlob,
+  getReportPhotos,
   getReports,
   getSummary,
   getZones,
@@ -32,6 +35,7 @@ import {
   type Report,
   type ReportFilters,
   type ReportPagination,
+  type ReportPhotoView,
   type Summary,
   type Zone
 } from "./services/api";
@@ -155,6 +159,18 @@ export default function App() {
     }
   }
 
+  async function loadReportPhotos(reportId: number): Promise<ReportPhotoView[]> {
+    const response = await getReportPhotos(token, reportId);
+    return Promise.all(response.data.map(async (photo) => ({
+      ...photo,
+      url: URL.createObjectURL(await getReportPhotoBlob(token, reportId, photo.id))
+    })));
+  }
+
+  async function handleDeletePhoto(reportId: number, photoId: number) {
+    await deleteReportPhoto(token, reportId, photoId);
+  }
+
   function applyFilters() {
     setActionError("");
     setActionMessage("");
@@ -237,6 +253,8 @@ export default function App() {
             onPageChange={setPage}
             onPageSizeChange={changePageSize}
             onStateChange={handleStateChange}
+            onLoadPhotos={loadReportPhotos}
+            onDeletePhoto={handleDeletePhoto}
             actionMessage={actionMessage}
             actionError={actionError}
           />

@@ -171,6 +171,12 @@ export const openApiDocument = {
       get: { tags: ["Fotos"], security: [{ AdminBearer: [] }], summary: "Lista fotos de reporte." },
       post: { tags: ["Fotos"], security: [{ FirebaseBearer: [] }], summary: "Agrega fotografia al reporte." }
     },
+    "/reportes/{id}/fotos/{fotoId}/archivo": {
+      get: { tags: ["Fotos"], security: [{ AdminBearer: [] }], summary: "Descarga una fotografia del reporte." }
+    },
+    "/reportes/{id}/fotos/{fotoId}": {
+      delete: { tags: ["Fotos"], security: [{ AdminBearer: [] }], summary: "Elimina una fotografia y registra la accion." }
+    },
     "/reportes/{id}/historial": {
       get: { tags: ["Reportes"], security: [{ AdminBearer: [] }], summary: "Lista historial del reporte." }
     },

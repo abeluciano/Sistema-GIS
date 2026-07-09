@@ -20,6 +20,14 @@ describe("ReportsTable", () => {
   test("runs actions, opens detail and changes page", async () => {
     const onStateChange = vi.fn().mockResolvedValue(undefined);
     const onPageChange = vi.fn();
+    const onLoadPhotos = vi.fn().mockResolvedValue([{
+      id: 9,
+      reporte_id: 27,
+      ruta_relativa: "reportes/27/evidencia.jpg",
+      created_at: "2026-07-08T17:00:00.000Z",
+      url: "blob:evidencia"
+    }]);
+    const onDeletePhoto = vi.fn().mockResolvedValue(undefined);
 
     render(
       <ReportsTable
@@ -28,6 +36,8 @@ describe("ReportsTable", () => {
         onPageChange={onPageChange}
         onPageSizeChange={vi.fn()}
         onStateChange={onStateChange}
+        onLoadPhotos={onLoadPhotos}
+        onDeletePhoto={onDeletePhoto}
       />
     );
 
@@ -38,6 +48,9 @@ describe("ReportsTable", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle del reporte 27" }));
     expect(screen.getByRole("dialog")).toHaveTextContent("Falta iluminacion en la avenida.");
+    expect(await screen.findByRole("img", { name: "Evidencia del reporte 27" })).toHaveAttribute("src", "blob:evidencia");
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar fotografia 9" }));
+    await waitFor(() => expect(onDeletePhoto).toHaveBeenCalledWith(27, 9));
 
     fireEvent.click(screen.getByRole("button", { name: "Pagina siguiente" }));
     expect(onPageChange).toHaveBeenCalledWith(2);

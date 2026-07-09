@@ -16,12 +16,12 @@ import {
   IonToolbar
 } from "@ionic/react";
 import { Camera, CheckCircle, ChevronLeft, LocateFixed, RefreshCw, Send } from "lucide-react";
-import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Camera as CapacitorCamera, CameraResultType, CameraSource, type Photo } from "@capacitor/camera";
 import { Geolocation } from "@capacitor/geolocation";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { createReport, getCategories, type Category, type Urgency } from "../services/api";
+import { createReport, getCategories, uploadReportPhoto, type Category, type Urgency } from "../services/api";
 
 export function NewReportPage() {
   const { user } = useAuth();
@@ -32,11 +32,13 @@ export function NewReportPage() {
   const [descripcion, setDescripcion] = useState("");
   const [direccion, setDireccion] = useState("");
   const [location, setLocation] = useState<{ latitud: number; longitud: number }>();
-  const [photoCaptured, setPhotoCaptured] = useState(false);
+  const [photo, setPhoto] = useState<Photo>();
+  const [pendingPhotoReportId, setPendingPhotoReportId] = useState<number>();
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [categoriesError, setCategoriesError] = useState("");
   const [capturingLocation, setCapturingLocation] = useState(false);
   const [capturingPhoto, setCapturingPhoto] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -113,12 +115,15 @@ export function NewReportPage() {
         return;
       }
 
-      await CapacitorCamera.getPhoto({
+      const capturedPhoto = await CapacitorCamera.getPhoto({
         resultType: CameraResultType.Uri,
         source: CameraSource.Camera,
         quality: 80
       });
-      setPhotoCaptured(true);
+      if (!capturedPhoto.webPath && !capturedPhoto.path) {
+        throw new Error("La camara no devolvio una fotografia.");
+      }
+      setPhoto(capturedPhoto);
       setMessage("Fotografia capturada.");
     } catch {
       setMessage("No se capturo la fotografia.");
@@ -138,8 +143,9 @@ export function NewReportPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
-      await createReport(user, {
+      const report = await createReport(user, {
         categoria_id: categoriaId,
         urgencia,
         descripcion,
@@ -147,10 +153,35 @@ export function NewReportPage() {
         longitud: location.longitud,
         direccion_aprox: direccion
       });
+      if (photo) {
+        try {
+          await uploadReportPhoto(user, report.id, photo);
+        } catch {
+          setPendingPhotoReportId(report.id);
+          setMessage(`Reporte #${report.id} creado. Reintenta la carga de la fotografia.`);
+          return;
+        }
+      }
       setMessage("Reporte enviado correctamente.");
       navigate("/mis-reportes");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo enviar el reporte.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function retryPhotoUpload() {
+    if (!user || !photo || !pendingPhotoReportId) return;
+    setSubmitting(true);
+    try {
+      await uploadReportPhoto(user, pendingPhotoReportId, photo);
+      setMessage("Fotografia enviada correctamente.");
+      navigate("/mis-reportes");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo subir la fotografia.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -220,15 +251,22 @@ export function NewReportPage() {
                 GPS listo: {location.latitud.toFixed(5)}, {location.longitud.toFixed(5)}
               </p>
             )}
-            <IonButton expand="block" fill="outline" color={photoCaptured ? "success" : "primary"} disabled={capturingPhoto} onClick={capturePhoto}>
-              {photoCaptured ? <CheckCircle size={18} /> : <Camera size={18} />}
-              <span>{capturingPhoto ? "Abriendo camara" : photoCaptured ? "Fotografia capturada" : "Capturar fotografia"}</span>
+            <IonButton expand="block" fill="outline" color={photo ? "success" : "primary"} disabled={capturingPhoto || submitting} onClick={capturePhoto}>
+              {photo ? <CheckCircle size={18} /> : <Camera size={18} />}
+              <span>{capturingPhoto ? "Abriendo camara" : photo ? "Fotografia capturada" : "Capturar fotografia"}</span>
             </IonButton>
-            {photoCaptured && <p className="form-action-status success-status">Fotografia capturada en el dispositivo.</p>}
-            <IonButton expand="block" onClick={submitReport}>
-              <Send size={18} />
-              <span>Enviar reporte</span>
-            </IonButton>
+            {photo && <p className="form-action-status success-status">Fotografia lista para enviar con el reporte.</p>}
+            {pendingPhotoReportId ? (
+              <IonButton expand="block" disabled={submitting} onClick={retryPhotoUpload}>
+                <RefreshCw size={18} />
+                <span>{submitting ? "Subiendo fotografia" : "Reintentar fotografia"}</span>
+              </IonButton>
+            ) : (
+              <IonButton expand="block" disabled={submitting} onClick={submitReport}>
+                <Send size={18} />
+                <span>{submitting ? "Enviando reporte" : "Enviar reporte"}</span>
+              </IonButton>
+            )}
           </div>
         </main>
         <IonToast isOpen={Boolean(message)} message={message} duration={2200} onDidDismiss={() => setMessage("")} />

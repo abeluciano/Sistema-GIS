@@ -52,6 +52,18 @@ export type Report = {
   geojson?: GeoJSON.Geometry;
 };
 
+export type ReportPhoto = {
+  id: number;
+  reporte_id: number;
+  ruta_relativa: string;
+  descripcion?: string | null;
+  created_at: string;
+};
+
+export type ReportPhotoView = ReportPhoto & {
+  url: string;
+};
+
 export type Summary = {
   total_reportes: number;
   pendientes: number;
@@ -243,6 +255,27 @@ export async function changeReportState(token: string, reportId: number, estado:
     method: "PATCH",
     headers: authHeaders(token),
     body: JSON.stringify({ estado })
+  });
+}
+
+export async function getReportPhotos(token: string, reportId: number) {
+  return request<{ data: ReportPhoto[] }>(`/reportes/${reportId}/fotos`, {
+    headers: authHeaders(token)
+  });
+}
+
+export async function getReportPhotoBlob(token: string, reportId: number, photoId: number) {
+  const response = await fetch(`${API_BASE_URL}/reportes/${reportId}/fotos/${photoId}/archivo`, {
+    headers: authHeaders(token)
+  });
+  if (!response.ok) throw new ApiError(response.status, "No se pudo cargar la fotografia.");
+  return response.blob();
+}
+
+export async function deleteReportPhoto(token: string, reportId: number, photoId: number) {
+  return request<void>(`/reportes/${reportId}/fotos/${photoId}`, {
+    method: "DELETE",
+    headers: authHeaders(token)
   });
 }
 

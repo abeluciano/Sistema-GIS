@@ -16,6 +16,7 @@ GoogleService-Info.plist
 local.properties
 *.jks
 *.keystore
+*.apk
 
 # Build outputs
 dist/

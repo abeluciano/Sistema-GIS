@@ -26,7 +26,14 @@ import { userRoutes } from "./routes/userRoutes.js";
 
 function corsOrigin(origin, callback) {
   const allowedOrigins = env.CORS_ORIGIN.split(",").map((value) => value.trim()).filter(Boolean);
-  if (!origin || allowedOrigins.includes(origin)) {
+  const isAllowed = allowedOrigins.some((allowedOrigin) => {
+    if (allowedOrigin === origin) return true;
+    if (!allowedOrigin.includes("*")) return false;
+    const pattern = new RegExp(`^${allowedOrigin.split("*").map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*")}$`);
+    return pattern.test(origin);
+  });
+
+  if (!origin || isAllowed) {
     callback(null, true);
     return;
   }

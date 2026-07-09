@@ -18,7 +18,9 @@ const envSchema = z.object({
   UPLOAD_ORPHAN_RETENTION_DAYS: z.coerce.number().int().min(1).default(7),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
-  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20)
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
+  PYTHON_BIN: z.string().default("python"),
+  SPATIAL_PERMUTATIONS: z.coerce.number().int().min(99).max(9999).default(999)
 });
 
 export const env = envSchema.parse(process.env);

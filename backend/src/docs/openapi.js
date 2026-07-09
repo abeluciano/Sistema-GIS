@@ -213,6 +213,9 @@ export const openApiDocument = {
     "/gis/concentracion-zonas.geojson": {
       get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Hotspots y coldspots exploratorios por conteos estandarizados." }
     },
+    "/gis/unidades-analisis.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Cuadricula de 250 o 500 metros con conteos y vecindad Queen." }
+    },
     "/gis/analisis/kde": {
       post: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Registra analisis espacial exploratorio tipo KDE basico." }
     },
@@ -233,6 +236,12 @@ export const openApiDocument = {
     },
     "/analisis/estadistico/friedman": {
       get: { tags: ["Estadistica"], security: [{ AdminBearer: [] }], summary: "Comparacion de tres o mas mediciones relacionadas si existen datos suficientes." }
+    },
+    "/analisis/espacial/moran": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Moran's I global con pesos Queen y permutaciones." }
+    },
+    "/analisis/espacial/moran-local.geojson": {
+      get: { tags: ["GIS"], security: [{ AdminBearer: [] }], summary: "Moran local en GeoJSON con correccion FDR." }
     },
     "/export/reportes.csv": {
       get: { tags: ["Exportacion"], security: [{ AdminBearer: [] }], summary: "Exporta reportes en CSV." }

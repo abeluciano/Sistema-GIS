@@ -21,6 +21,7 @@ import { photoRoutes } from "./routes/photoRoutes.js";
 import { reportRoutes } from "./routes/reportRoutes.js";
 import { indicatorRoutes } from "./routes/indicatorRoutes.js";
 import { statisticsRoutes } from "./routes/statisticsRoutes.js";
+import { spatialStatisticsRoutes } from "./routes/spatialStatisticsRoutes.js";
 import { userRoutes } from "./routes/userRoutes.js";
 
 function corsOrigin(origin, callback) {
@@ -68,6 +69,7 @@ export function createApp(options = {}) {
   app.use(gisRoutes);
   app.use(exportRoutes);
   app.use(statisticsRoutes);
+  app.use(spatialStatisticsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

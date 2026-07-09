@@ -24,5 +24,9 @@ describe("health routes", () => {
     expect(response.body.paths["/zonas/reasignar"]).toBeDefined();
     expect(response.body.paths["/reportes/{id}/fotos/{fotoId}/archivo"]).toBeDefined();
     expect(response.body.paths["/gis/concentracion-zonas.geojson"]).toBeDefined();
+    expect(response.body.paths["/gis/unidades-analisis.geojson"]).toBeDefined();
+    expect(response.body.paths["/indicadores/comparacion-periodos"]).toBeDefined();
+    expect(response.body.paths["/analisis/espacial/moran"]).toBeDefined();
+    expect(response.body.paths["/analisis/espacial/moran-local.geojson"]).toBeDefined();
   });
 });

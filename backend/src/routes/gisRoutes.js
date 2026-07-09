@@ -18,6 +18,17 @@ const gisFilters = z.object({
   })
 });
 
+const analysisUnitFilters = z.object({
+  query: z.object({
+    tamanio: z.coerce.number().int().refine((value) => [250, 500].includes(value)).default(500),
+    estado: z.enum(["pendiente", "validado", "rechazado", "atendido", "archivado"]).optional(),
+    categoria_id: z.coerce.number().int().positive().optional(),
+    zona_id: z.coerce.number().int().positive().optional(),
+    fecha_inicio: z.iso.date().optional(),
+    fecha_fin: z.iso.date().optional()
+  })
+});
+
 function filterValues(req) {
   return [
     req.query.estado ?? null,
@@ -154,6 +165,62 @@ gisRoutes.get("/gis/concentracion-zonas.geojson", validate(gisFilters), asyncHan
     ) as geojson
     from clasificacion
   `, filterValues(req));
+
+  res.json(result.rows[0].geojson);
+}));
+
+gisRoutes.get("/gis/unidades-analisis.geojson", validate(analysisUnitFilters), asyncHandler(async (req, res) => {
+  const filters = req.validatedQuery;
+  const values = [
+    filters.tamanio,
+    filters.estado ?? null,
+    filters.categoria_id ?? null,
+    filters.zona_id ?? null,
+    filters.fecha_inicio ?? null,
+    filters.fecha_fin ?? null
+  ];
+  const result = await query(`
+    with unidades as (
+      select
+        u.id,
+        u.codigo,
+        u.tamanio_m,
+        u.geom,
+        u.area_m2,
+        count(r.id)::int as total,
+        (select count(*)::int from unidad_vecinos v where v.unidad_id = u.id) as vecinos
+      from unidades_espaciales u
+      left join reportes r
+        on st_covers(u.geom, r.ubicacion)
+       and ($2::varchar is null or r.estado = $2::varchar)
+       and ($3::int is null or r.categoria_id = $3::int)
+       and ($4::int is null or r.zona_id = $4::int)
+       and ($5::date is null or r.created_at::date >= $5::date)
+       and ($6::date is null or r.created_at::date <= $6::date)
+      where u.tamanio_m = $1::int
+      group by u.id, u.codigo, u.tamanio_m, u.geom, u.area_m2
+    )
+    select jsonb_build_object(
+      'type', 'FeatureCollection',
+      'tamanio_m', $1::int,
+      'total_unidades', count(*)::int,
+      'unidades_aisladas', count(*) filter (where vecinos = 0)::int,
+      'features', coalesce(jsonb_agg(jsonb_build_object(
+        'type', 'Feature',
+        'geometry', st_asgeojson(geom)::jsonb,
+        'properties', jsonb_build_object(
+          'id', id,
+          'codigo', codigo,
+          'tamanio_m', tamanio_m,
+          'area_m2', area_m2,
+          'total', total,
+          'densidad_km2', round((total / nullif(area_m2, 0) * 1000000)::numeric, 3),
+          'vecinos', vecinos
+        )
+      ) order by codigo), '[]'::jsonb)
+    ) as geojson
+    from unidades
+  `, values);
 
   res.json(result.rows[0].geojson);
 }));

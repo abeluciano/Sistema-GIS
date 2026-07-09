@@ -1,7 +1,12 @@
 import type { User } from "firebase/auth";
 import { Capacitor } from "@capacitor/core";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://68-211-162-69.sslip.io";
+const DEFAULT_API_BASE_URL = "https://68-211-162-69.sslip.io";
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  import.meta.env.PROD && configuredApiBaseUrl?.includes("localhost")
+    ? DEFAULT_API_BASE_URL
+    : configuredApiBaseUrl ?? DEFAULT_API_BASE_URL;
 
 export type ReportStatus = "pendiente" | "validado" | "rechazado" | "atendido" | "archivado";
 export type Urgency = "baja" | "media" | "alta" | "critica";

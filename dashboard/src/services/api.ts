@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://68-211-162-69.sslip.io";
 
 export type EstadoReporte = "pendiente" | "validado" | "rechazado" | "atendido" | "archivado";
 export type Urgencia = "baja" | "media" | "alta" | "critica";

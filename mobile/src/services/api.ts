@@ -35,6 +35,13 @@ export interface CapturedPhoto {
   format: string;
 }
 
+const photoMimeTypes: Record<string, string> = {
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp"
+};
+
 async function authHeaders(user: User) {
   const token = await user.getIdToken();
   return { Authorization: `Bearer ${token}` };
@@ -92,9 +99,14 @@ export async function uploadReportPhoto(user: User, reportId: number, photo: Cap
   const photoResponse = await fetch(sourceUrl);
   if (!photoResponse.ok) throw new Error("No se pudo preparar la fotografia.");
 
-  const extension = photo.format === "jpeg" ? "jpg" : photo.format;
+  const normalizedFormat = photo.format.toLowerCase();
+  const mimeType = photoMimeTypes[normalizedFormat] ?? "image/jpeg";
+  const extension = normalizedFormat === "jpeg" ? "jpg" : normalizedFormat;
+  const photoBlob = await photoResponse.blob();
+  const uploadBlob = photoBlob.type === mimeType ? photoBlob : new Blob([photoBlob], { type: mimeType });
+
   const formData = new FormData();
-  formData.append("foto", await photoResponse.blob(), `reporte-${reportId}.${extension}`);
+  formData.append("foto", uploadBlob, `reporte-${reportId}.${extension}`);
 
   const response = await fetch(`${API_BASE_URL}/reportes/${reportId}/fotos`, {
     method: "POST",

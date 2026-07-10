@@ -158,7 +158,7 @@ export function NewReportPage() {
           await uploadReportPhoto(user, report.id, photo);
         } catch {
           setPendingPhotoReportId(report.id);
-          setMessage(`Reporte #${report.id} creado. Reintenta la carga de la fotografia.`);
+          setMessage("Reporte enviado correctamente. La fotografia no se pudo adjuntar.");
           return;
         }
       }
@@ -200,9 +200,10 @@ export function NewReportPage() {
       <IonContent>
         <main className="page-body form-flow">
           <IonList inset>
-            <IonItem>
+            <IonItem className="stacked-select-item">
               <IonLabel>Categoria</IonLabel>
               <IonSelect
+                className="form-select"
                 value={categoriaId}
                 disabled={loadingCategories || categories.length === 0}
                 placeholder={loadingCategories ? "Cargando" : "Seleccionar"}
@@ -224,9 +225,9 @@ export function NewReportPage() {
                 </IonButton>
               </IonItem>
             )}
-            <IonItem>
+            <IonItem className="stacked-select-item">
               <IonLabel>Urgencia</IonLabel>
-              <IonSelect value={urgencia} onIonChange={(event) => setUrgencia(event.detail.value)}>
+              <IonSelect className="form-select" value={urgencia} onIonChange={(event) => setUrgencia(event.detail.value)}>
                 <IonSelectOption value="baja">Baja</IonSelectOption>
                 <IonSelectOption value="media">Media</IonSelectOption>
                 <IonSelectOption value="alta">Alta</IonSelectOption>

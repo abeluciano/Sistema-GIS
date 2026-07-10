@@ -109,6 +109,32 @@ body {
   margin-inline: 0;
 }
 
+.form-flow .stacked-select-item {
+  --inner-padding-top: 10px;
+  --inner-padding-bottom: 10px;
+  align-items: flex-start;
+}
+
+.form-flow .stacked-select-item ion-label {
+  min-width: 104px;
+  max-width: 104px;
+  padding-top: 5px;
+}
+
+.form-flow .form-select {
+  max-width: calc(100% - 112px);
+  min-height: 36px;
+  white-space: normal;
+}
+
+.form-flow .form-select::part(text),
+.form-flow .form-select::part(placeholder) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  text-align: right;
+}
+
 .form-actions {
   display: grid;
   gap: 10px;

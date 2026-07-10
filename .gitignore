@@ -36,6 +36,7 @@ pnpm-debug.log*
 # Runtime uploads and generated data
 backend/uploads/**
 !backend/uploads/.gitkeep
+output/*.js
 tmp/
 
 # Local editor and Codex metadata

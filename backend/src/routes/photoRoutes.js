@@ -85,14 +85,16 @@ photoRoutes.post(
     const rutaRelativa = `reportes/${req.params.id}/${req.file.filename}`;
     const result = await query(
       "insert into reporte_fotos (reporte_id, ruta_relativa, descripcion) values ($1, $2, $3) returning *",
-      [req.params.id, rutaRelativa, req.body.descripcion ?? null]
+      [req.params.id, rutaRelativa, req.body?.descripcion ?? null]
     );
 
     const user = await req.app.locals.repositories.user.findByFirebaseUid(req.firebaseUser.uid);
-    await query(
-      "insert into historial_reportes (reporte_id, usuario_id, accion, comentario) values ($1, $2, 'agregar_foto', $3)",
-      [req.params.id, user.id, "Fotografia agregada por ciudadano"]
-    );
+    if (user) {
+      await query(
+        "insert into historial_reportes (reporte_id, usuario_id, accion, comentario) values ($1, $2, 'agregar_foto', $3)",
+        [req.params.id, user.id, "Fotografia agregada por ciudadano"]
+      );
+    }
 
     res.status(201).json({ data: result.rows[0] });
   })

@@ -4,7 +4,9 @@ const config: CapacitorConfig = {
   appId: "com.jlbr.reportes",
   appName: "Sistema GIS Ciudadano",
   webDir: "dist",
-  bundledWebRuntime: false,
+  server: {
+    androidScheme: "https"
+  },
   plugins: {
     FirebaseAuthentication: {
       skipNativeAuth: false,
